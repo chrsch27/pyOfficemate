@@ -1,0 +1,138 @@
+{
+    "id": "d8a8d2e7-effd-4dbd-b381-4ac1ddfdd6a8",
+    "type": "RequestForQuote",
+    "buyer": {
+        "tnId": 11609,
+        "name": "Faye Demo - UAT"
+    },
+    "supplier": {
+        "tnId": 238322,
+        "name": "Hamburg Factorship GmbH"
+    },
+    "comment": "",
+    "createdDate": "2025-02-10T16:59:48.487Z",
+    "currency": {
+        "code": "EUR"
+    },
+ 
+    "submittedDate": "2025-02-10T16:59:48.487Z",
+    "termsAndConditions": "Please note that 0% VAT tariff is applicable to this order according to EC 6th VAT directive 2006/112, Art 148.\n\n \n\nAll items should be in compliance with Marine Equipment Directive 2014/90/EU, with MEPC 269.(68) and all other\n regulations in force.\n\n \n\nTHE MINIMUM QUANTITY OF PACKAGING MATERIALS TO BE UTILISED, TAKING INTO CONSIDERATION THE\n\nSAFETY AND SECURITY OF THE ITEMS DELIVERED. WHEREVER POSSIBLE, PACKAGING SHOULD BE MANUFACTURED FROM\n\nRENEWABLE AND/ OR RECYCLABLE RESOURCES UTILISING THE MINIMUM QUANTITY OF PLASTICS. PACKAGING REMAINING ON THE\n\nVESSEL WILL BE DISPOSED OF WITHIN THE RELEVANT COMPANY, NATIONAL AND INTERNATIONAL REGULATIONS.\n\nPLS MAKE SURE THAT ALL PRODUCTS INQUIRED OR PURCHASED BY Q-SHIP MANAGEMENT ARE ASBESTOS FREE.\n\nTHE OBJECTIVE OF THE BAN IS TO ELIMINATE HARMFUL EXPOSURE TO ASBESTOS AND REDUCE FUTURE DEATHS AND ILLNESS.\n\nTHE INQUIRY NUMBER AND THE VESSEL NAME MUST BE CLEARLY STATED ON YOUR QUOTATION. :AND: This Purchase Order is subject to the Conditions of Purchase found at http://carnivaluksupplier.co.uk/SupplierDocuments.aspx unless a separate signed agreement between the parties exists.  Vendor acknowledges that Carnival has established a Business Partner Code of Conduct that can also be found at the link above.",
+    "vessel": {
+        "imoNumber": "9489986",
+        "name": "Bulker Bee 30"
+    },
+    "lineItems": [
+        {
+            "number": 1,
+            "comment": "Remark 2: TSS Marine Cargo Crane Single deck crane kl 30t-25m TSS Yard-No. 2-571-7/3945-7/3948 Year of construction - Aug 2009  Pressure Roller - full set  Material No.: 5005292 (see attachement)",
+            "description": "Name: TSS Marine Cargo Crane - Pressure Roller",
+            "equipmentSection": {
+                "accountNumber": "",
+                "name": "",
+                "rating": "",
+                "description": "Additional Item Information: Order No.: 001;  Draw. No.: 5005292",
+                "manufacturer": "",
+                "modelNumber": "",
+                "departmentType": "",
+                "departmentCode": "",
+                "serialNumber": "",
+                "drawingNumber": "",
+                "id": "e0e13555-8845-4bac-a244-65565d9f7708"
+            },
+            "quantity": 2.0,
+            "totalCost": 0,
+            "unitPrice": 0,
+            "unitOfMeasure": "SET",
+            "partIdentification": [
+                {
+                    "partCode": "5005292-01",
+                    "partType": "Manufacturer"
+                }
+            ],
+            "id": "0a13729f-73c8-4ac5-97da-b8ddcaedf0b9",
+            "status": "Original",
+            "declinedReasonText": ""
+        }
+    ],
+    "buyerContact": {
+        "name": "Faye Demo - UAT",
+        "identification": "",
+        "address": {
+            "streetAddress1": "Waalhaven Zuidzijde 21",
+            "city": "Rotterdam",
+            "countryCode": "",
+            "zipCode": "3089 JH",
+            "state": ""
+        },
+        "contact": {
+            "name": "Faye Guevara",
+            "jobTitle": "Purchasing",
+            "mobile": "",
+            "telephone": "00905316976183",
+            "email": "fguevara@shipserv.com",
+            "fax": ""
+        }
+    },
+    "supplierContact": {
+        "name": "Hamburg Factorship GmbH",
+        "identification": "",
+        "address": {
+            "streetAddress1": "Name 2: Altendeicher Chaussee 159 DE - 25489 Haselau",
+            "city": "",
+            "countryCode": "DE",
+            "zipCode": "",
+            "state": ""
+        },
+        "contact": {
+            "name": "",
+            "jobTitle": "SalesRepresentative",
+            "mobile": "",
+            "telephone": "+49 4129 955103",
+            "email": "christoph@factorship.hamburg",
+            "fax": ""
+        }
+    },
+    "freightForwarder": {},
+    "billing": {
+        "name": "Faye Demo - UAT",
+        "identification": "",
+        "address": {
+            "streetAddress1": "Waalhaven Zuidzijde 21",
+            "city": "Rotterdam",
+            "countryCode": "",
+            "zipCode": "3089 JH",
+            "state": ""
+        },
+        "contact": {
+            "name": "Q-Shipping BV",
+            "jobTitle": "Purchasing",
+            "mobile": "",
+            "telephone": "0031(0)850433000",
+            "email": "fguevara@shipserv.com",
+            "fax": ""
+        }
+    },
+    "consignee": {
+        "name": "",
+        "identification": "",
+        "address": {
+            "city": "",
+            "countryCode": "",
+            "zipCode": "",
+            "state": ""
+        },
+        "contact": {
+            "name": "",
+            "jobTitle": "Consignee",
+            "mobile": "",
+            "telephone": "",
+            "email": "",
+            "fax": ""
+        }
+    },
+    "invoicee": {},
+    "portAgent": {},
+    "buyerAgent": {},
+    "status": "Unactioned",
+    "replaced": false
+}

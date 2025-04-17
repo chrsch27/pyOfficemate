@@ -1,0 +1,474 @@
+{
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "type": {
+            "type": "string"
+        },
+        "buyer": {
+            "type": "object",
+            "properties": {
+                "tnId": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "supplier": {
+            "type": "object",
+            "properties": {
+                "tnId": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "adviseBeforeDate": {
+            "type": "string"
+        },
+        "comment": {
+            "type": "string"
+        },
+        "createdDate": {
+            "type": "string"
+        },
+        "currency": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                }
+            }
+        },
+        "deliveryPort": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "countryCode": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "taxStatus": {
+            "type": "string"
+        },
+        "paymentTerms": {
+            "type": "string"
+        },
+        "priority": {
+            "type": "string"
+        },
+        "referenceNumber": {
+            "type": "string"
+        },
+        "requestedDeliveryDate": {
+            "type": "string"
+        },
+        "subject": {
+            "type": "string"
+        },
+        "submittedDate": {
+            "type": "string"
+        },
+        "termsAndConditions": {
+            "type": "string"
+        },
+        "vessel": {
+            "type": "object",
+            "properties": {
+                "imoNumber": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "lineItems": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "number": {
+                        "type": "integer"
+                    },
+                    "comment": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "equipmentSection": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "properties": {
+                            "accountNumber": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "name": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "rating": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "description": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "manufacturer": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "modelNumber": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "departmentType": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "departmentCode": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "serialNumber": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "drawingNumber": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "id": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        }
+                    },
+                    "quantity": {
+                        "type": "integer"
+                    },
+                    "totalCost": {
+                        "type": "integer"
+                    },
+                    "unitPrice": {
+                        "type": "integer"
+                    },
+                    "unitOfMeasure": {
+                        "type": "string"
+                    },
+                    "partIdentification": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "partCode": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
+                                },
+                                "partType": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ]
+                                }
+                            },
+                            "required": []
+                        }
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "declinedReasonText": {
+                        "type": "string"
+                    }
+                },
+                "required": []
+            }
+        },
+        "buyerContact": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "identification": {
+                    "type": "string"
+                },
+                "address": {
+                    "type": "object",
+                    "properties": {
+                        "city": {
+                            "type": "string"
+                        },
+                        "countryCode": {
+                            "type": "string"
+                        },
+                        "zipCode": {
+                            "type": "string"
+                        },
+                        "state": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "contact": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "jobTitle": {
+                            "type": "string"
+                        },
+                        "mobile": {
+                            "type": "string"
+                        },
+                        "telephone": {
+                            "type": "string"
+                        },
+                        "email": {
+                            "type": "string"
+                        },
+                        "fax": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "supplierContact": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "identification": {
+                    "type": "string"
+                },
+                "address": {
+                    "type": "object",
+                    "properties": {
+                        "streetAddress1": {
+                            "type": "string"
+                        },
+                        "streetAddress2": {
+                            "type": "string"
+                        },
+                        "city": {
+                            "type": "string"
+                        },
+                        "countryCode": {
+                            "type": "string"
+                        },
+                        "zipCode": {
+                            "type": "string"
+                        },
+                        "state": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "contact": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "jobTitle": {
+                            "type": "string"
+                        },
+                        "mobile": {
+                            "type": "string"
+                        },
+                        "telephone": {
+                            "type": "string"
+                        },
+                        "email": {
+                            "type": "string"
+                        },
+                        "fax": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "freightForwarder": {
+            "type": "object",
+            "properties": {}
+        },
+        "billing": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "identification": {
+                    "type": "string"
+                },
+                "address": {
+                    "type": "object",
+                    "properties": {
+                        "streetAddress1": {
+                            "type": "string"
+                        },
+                        "streetAddress2": {
+                            "type": "string"
+                        },
+                        "city": {
+                            "type": "string"
+                        },
+                        "countryCode": {
+                            "type": "string"
+                        },
+                        "zipCode": {
+                            "type": "string"
+                        },
+                        "state": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "contact": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "jobTitle": {
+                            "type": "string"
+                        },
+                        "mobile": {
+                            "type": "string"
+                        },
+                        "telephone": {
+                            "type": "string"
+                        },
+                        "email": {
+                            "type": "string"
+                        },
+                        "fax": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "consignee": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "identification": {
+                    "type": "string"
+                },
+                "address": {
+                    "type": "object",
+                    "properties": {
+                        "city": {
+                            "type": "string"
+                        },
+                        "countryCode": {
+                            "type": "string"
+                        },
+                        "zipCode": {
+                            "type": "string"
+                        },
+                        "state": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "contact": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "jobTitle": {
+                            "type": "string"
+                        },
+                        "mobile": {
+                            "type": "string"
+                        },
+                        "telephone": {
+                            "type": "string"
+                        },
+                        "email": {
+                            "type": "string"
+                        },
+                        "fax": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "invoicee": {
+            "type": "object",
+            "properties": {}
+        },
+        "portAgent": {
+            "type": "object",
+            "properties": {}
+        },
+        "buyerAgent": {
+            "type": "object",
+            "properties": {}
+        },
+        "status": {
+            "type": "string"
+        },
+        "replaced": {
+            "type": "boolean"
+        }
+    }
+}

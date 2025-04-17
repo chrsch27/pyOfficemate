@@ -1,0 +1,122 @@
+{
+    "type": "Quote",
+    "buyer": {
+        "tnId": 11609,
+        "name": "Faye Demo - UAT"
+    },
+    "supplier": {
+        "tnId": 238322,
+        "name": "Hamburg Factorship GmbH"
+    },
+    "subject": "TSS Marine Cargo Crane - Pressure Roller",
+    "comment": "",
+    "referenceNumber": "BB30-2025-D0002-B(01)/1",
+    "requisitionId": "dd74b6a4-94d8-4612-a443-8cd67436a1e6",
+    "requestForQuoteId": "7c3c27ff-a668-4134-abdf-c0679df90d93",
+    "quoteId": "4550bbc9-9c9c-4561-bd4d-239cdd00d313",
+    "purchaseOrderId": "ffc703b7-f18f-4d7c-825d-9ea564671a4f",
+    "priority": "Medium",
+    "offeredQuality": "Genuine",
+    "taxStatus": "Exempt",
+    "paymentTerms": "",
+    "termsAndConditions": "Please note that 0% VAT tariff is applicable to this order according to EC 6th VAT directive 2006/112, Art 148.\n\n \n\nAll items should be in compliance with Marine Equipment Directive 2014/90/EU, with MEPC 269.(68) and all other\n regulations in force.\n\n \n\nTHE MINIMUM QUANTITY OF PACKAGING MATERIALS TO BE UTILISED, TAKING INTO CONSIDERATION THE\n\nSAFETY AND SECURITY OF THE ITEMS DELIVERED. WHEREVER POSSIBLE, PACKAGING SHOULD BE MANUFACTURED FROM\n\nRENEWABLE AND/ OR RECYCLABLE RESOURCES UTILISING THE MINIMUM QUANTITY OF PLASTICS. PACKAGING REMAINING ON THE\n\nVESSEL WILL BE DISPOSED OF WITHIN THE RELEVANT COMPANY, NATIONAL AND INTERNATIONAL REGULATIONS.\n\nPLS MAKE SURE THAT ALL PRODUCTS INQUIRED OR PURCHASED BY Q-SHIP MANAGEMENT ARE ASBESTOS FREE.\n\nTHE OBJECTIVE OF THE BAN IS TO ELIMINATE HARMFUL EXPOSURE TO ASBESTOS AND REDUCE FUTURE DEATHS AND ILLNESS.\n\nTHE INQUIRY NUMBER AND THE VESSEL NAME MUST BE CLEARLY STATED ON YOUR QUOTATION.",
+    "transportMode": "",
+    "vessel": {
+        "name": "Bulker Bee 30",
+        "imoNumber": "9489986",
+        "estimatedTimeArrival": "2025-04-11T16:50:53.795037Z",
+        "estimatedTimeDeparture": "2025-04-11T16:50:53.795037Z"
+    },
+    "deliveryPort": {
+        "code": null,
+        "name": null,
+        "countryCode": null
+    },
+    "deliveryTerms": {
+        "code": null,
+        "placeOfDelivery": null
+    },
+    "packagingInstructions": null,
+    "billing": {
+        "name": "Faye Demo - UAT",
+        "identification": null,
+        "address": {
+            "streetAddress1": "Waalhaven Zuidzijde 21",
+            "streetAddress2": null,
+            "city": "Rotterdam",
+            "zipCode": "3089 JH",
+            "state": null,
+            "countryCode": null
+        },
+        "contact": {
+            "jobTitle": "Purchasing",
+            "name": "Faye Demo - UAT",
+            "telephone": "0031(0)850433000",
+            "fax": null,
+            "email": "fguevara@shipserv.com"
+        }
+    },
+    "buyerContact": {
+        "name": "Faye Demo - UAT",
+        "identification": null,
+        "address": {
+            "streetAddress1": "Waalhaven Zuidzijde 21",
+            "streetAddress2": null,
+            "city": "Rotterdam",
+            "zipCode": "3089 JH",
+            "state": null,
+            "countryCode": null
+        },
+        "contact": {
+            "jobTitle": "Purchasing",
+            "name": "Faye Guevara",
+            "telephone": "00905316976183",
+            "fax": null,
+            "email": "fguevara@shipserv.com"
+        }
+    },
+    "supplierContact": {
+        "name": "Hamburg Factorship GmbH",
+        "identification": null,
+        "address": {
+            "streetAddress1": "Name 2: Altendeicher Chaussee 159 DE - 25489 Haselau",
+            "streetAddress2": null,
+            "city": null,
+            "zipCode": null,
+            "state": null,
+            "countryCode": "DE"
+        },
+        "contact": {
+            "jobTitle": "SalesRepresentative",
+            "name": null,
+            "telephone": "+49 4129 955103",
+            "fax": null,
+            "email": "christoph@factorship.hamburg"
+        }
+    },
+    "lineItemCount": null,
+    "lineItems": [
+        {
+            "number": 1,
+            "partCode": "",
+            "description": "5005292-01",
+            "unitOfMeasure": "PCE",
+            "quantity": 2.0,
+            "unitPrice": 68.4,
+            "discountCost": 0.0,
+            "totalCost": 136.8
+        }
+    ],
+    "currency": {
+        "code": "EUR"
+    },
+    "exported": true,
+    "exportedDate": null,
+    "createdDate": "2025-04-11T16:58:33.470291Z",
+    "submittedDate": "2025-04-11T16:58:33",
+    "ERPNummer": "250791",
+    "discountCost": 0.0,
+    "subCost": 136.8,
+    "cost": 136.8,
+    "quoteExpiryDate": "2025-12-31T23:59:59"
+}

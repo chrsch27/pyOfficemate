@@ -1,0 +1,490 @@
+import azure.functions as func
+import logging
+import os
+import requests
+import json
+from utils import transform_response  # Importiere die Funktion
+import uuid
+from datetime import datetime
+import dispatcher
+from dispatcher import register_erp_integration
+from integrations.erp_collmex import ERPcollmexIntegration
+from integrations.erp_pds import ERPpdsIntegration
+from integrations.erp_sharepoint import ERPsharepointIntegration
+import urllib.parse
+
+app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
+shipserv_url= os.getenv("SHIPSERV_URL")
+
+def load_schema():
+    schema_path = os.path.join(os.path.dirname(__file__), "shipservschema.json")
+    with open(schema_path, "r") as schema_file:
+        return json.load(schema_file)
+    
+def initialize_erp_integrations():
+    """
+    Dynamically register all ERP integrations.
+    """
+    register_erp_integration("collmex", ERPcollmexIntegration)
+    register_erp_integration("sharepoint", ERPsharepointIntegration)
+    register_erp_integration("pds", ERPpdsIntegration)
+
+# Initialisierung aufrufen
+initialize_erp_integrations()
+    
+def get_token() -> str:
+    """Fetches an OAuth2 token from the authentication endpoint."""
+    token_url = f"{shipserv_url}/authentication/oauth2/token"
+    client_id = os.getenv("SHIPSERV_CLIENT_ID")
+    client_secret = os.getenv("SHIPSERV_CLIENT_SECRET")
+
+    if not client_id or not client_secret:
+        logging.error("CLIENT_ID or CLIENT_SECRET environment variables are not set.")
+        return None
+
+    payload = {
+        "grant_type": "client_credentials",
+        "client_id": client_id,
+        "client_secret": client_secret
+    }
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    try:
+        response = requests.post(token_url, json=payload, headers=headers)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+        token_data = response.json()
+        logging.info(f"Token fetched successfully: {token_data}")
+        return token_data.get("access_token")
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error fetching token: {e}")
+        return None
+
+@app.route(route="csitofficemate")
+def csitofficemate(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Python HTTP trigger function processed a request.')
+
+    name = req.params.get('name')
+    if not name:
+        try:
+            req_body = req.get_json()
+        except ValueError:
+            pass
+        else:
+            name = req_body.get('name')
+
+    if name:
+        return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
+    else:
+        return func.HttpResponse(
+             "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
+             status_code=200
+        )
+
+@app.route(route="shipserv_getDocument")
+def shipserv_getDocument(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Python HTTP trigger function "getInquiry" processed a request.')
+
+    # Extract the 'id' parameter from the query string
+    document_id = req.params.get('id')
+    erp_targets = req.params.get('erpTargets', "").split(",")  # Comma-separated list of ERP targets
+    
+    if not document_id:
+        return func.HttpResponse(
+            "Please provide a document ID in the query string (e.g., ?id=12345).",
+            status_code=400
+        )
+    
+    token = get_token()
+    if not token:
+        return func.HttpResponse(
+            "Failed to fetch authentication token.",
+            status_code=500
+        )
+
+
+    # Define the API endpoint and headers
+    api_url = f"{shipserv_url}/order-management/documents/{document_id}"
+    headers = {
+        'Accept': 'application/json',
+        #'Api-Version': 'v2.1',
+        'Authorization': f"Bearer {token}"  # Replace with a secure method to store the token
+    }
+
+    try:
+        # Perform the GET request
+        response = requests.get(api_url, headers=headers)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+
+        # Transform the response
+        transformed_response = transform_response(response.json())
+
+        dispatch_results = dispatcher.dispatch_to_erps(transformed_response, erp_targets)
+
+        # Return the transformed JSON response
+        return func.HttpResponse(
+             json.dumps({
+                "document": transformed_response,
+                "dispatchResults": dispatch_results
+            }),
+            mimetype="application/json",
+            status_code=response.status_code
+        )
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error during API call: {e}")
+        return func.HttpResponse(
+            "Error fetching data from the ShipServ API.",
+            status_code=500
+        )
+
+@app.route(route="shipserv_getDocuments")
+def shipserv_getDocuments(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Python HTTP trigger function "getDocuments" processed a request.')
+
+    # Extract the 'DocType' parameter from the query string
+    doc_type = req.params.get('DocType')
+    if not doc_type:
+        return func.HttpResponse(
+            "Please provide a DocType in the query string (e.g., ?DocType=RequestForCode).",
+            status_code=400
+        )
+
+    # Fetch the token
+    token = get_token()
+    if not token:
+        return func.HttpResponse(
+            "Failed to fetch authentication token.",
+            status_code=500
+        )
+
+    # Define the API endpoint and headers
+    api_url = f"{shipserv_url}/order-management/documents?type={doc_type}&submittedDate=2025-04-02"
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': f"Bearer {token}"
+    }
+
+    try:
+        # Perform the GET request
+        response = requests.get(api_url, headers=headers)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+
+        # Return the JSON response
+        return func.HttpResponse(
+            response.text,
+            mimetype="application/json",
+            status_code=response.status_code
+        )
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error during API call: {e}")
+        return func.HttpResponse(
+            "Error fetching documents from the ShipServ API.",
+            status_code=500
+        )
+
+@app.route(route="modifyAndSendDocument", methods=["POST"])
+def modifyAndSendDocument(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Processing and modifying document data.')
+
+    try:
+        # Parse the request body
+        request_body = req.get_json()
+        document_data = request_body.get("document")
+        line_items = request_body.get("lineItems")
+        custom_fields = request_body.get("customFields", {})
+
+        if not document_data or not line_items:
+            return func.HttpResponse(
+                "Invalid input. Please provide 'document' and 'lineItems' in the request body.",
+                status_code=400
+            )
+
+        # Replace the 'id' field with 'requestForQuoteId'
+        document_data["requestForQuoteId"] = document_data.pop("id", None)
+
+        # Replace the lineItems in the document data
+        document_data["lineItems"] = line_items
+
+        # Replace or add custom fields
+        document_data["type"] = custom_fields.get("type", "Quote")
+        document_data["discountCost"] = custom_fields.get("discountCost", 0)
+        document_data["subCost"] = custom_fields.get("subCost", 45)
+        document_data["cost"] = custom_fields.get("cost", 45)
+        document_data["termsAndConditions"] = custom_fields.get("termsAndConditions", document_data.get("termsAndConditions", ""))
+        document_data["paymentTerms"] = custom_fields.get("paymentTerms", document_data.get("paymentTerms", ""))
+        document_data["createdDate"] = custom_fields.get("createdDate", datetime.utcnow().isoformat() + "Z")
+        document_data["submittedDate"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
+        document_data["quoteExpiryDate"] = custom_fields.get("quoteExpiryDate", "2025-12-31T23:59:59")
+
+        # Fetch the token
+        token = get_token()
+        if not token:
+            return func.HttpResponse(
+                "Failed to fetch authentication token.",
+                status_code=500
+            )
+
+        # Define the API endpoint and headers
+        api_url = f"{shipserv_url}/order-management/documents"
+        headers = {
+            "Api-Version": "v2.1",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": f"Bearer {token}"
+        }
+
+        # Perform the POST request to send the modified document
+        response = requests.post(api_url, json=document_data, headers=headers)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+
+        # Return the API response
+        return func.HttpResponse(
+            response.text,
+            mimetype="application/json",
+            status_code=response.status_code
+        )
+    except ValueError:
+        return func.HttpResponse(
+            "Invalid JSON in the request body.",
+            status_code=400
+        )
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error during API call: {e}")
+        return func.HttpResponse(
+            "Error sending the document to the ShipServ API.",
+            status_code=500
+        )
+
+@app.route(route="sendDataToPortal", methods=["POST"])
+def sendDataToPortal(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Fetching data from ERP and sending it to the portal.')
+
+    try:
+        # Parse the request body
+        request_body = req.get_json()
+        erp_name = request_body.get("erpName")
+        document_id = request_body.get("documentId")
+        document_type = request_body.get("documentType")
+
+        if not erp_name or not document_id or not document_type:
+            return func.HttpResponse(
+                "Please provide 'erpName', 'documentId', and 'documentType' in the request body.",
+                status_code=400
+            )
+
+        # Fetch data from the ERP system using the dispatcher
+        document_data = dispatcher.fetch_data_from_erp(erp_name, document_id, document_type)
+        logging.info(f"Fetched document data: {document_data}") 
+        if not document_data:
+            return func.HttpResponse(
+                f"Failed to fetch data from ERP system '{erp_name}' for document ID '{document_id}'.",
+                status_code=500
+            )
+
+        # Prepare the data for modifyAndSendDocument
+        #document_data["portalData"] = request_body.get("portalData", {})
+        #document_data["lineItems"] = request_body.get("lineItems", [])
+        #document_data["customFields"] = request_body.get("customFields", {})
+
+        # Call modifyAndSendDocument logic
+        return modify_and_send_document_logic(document_data)
+    except ValueError as e:
+        logging.error(f"Error: {e}")
+        return func.HttpResponse(
+            str(e),
+            status_code=400
+        )
+    except Exception as e:
+        logging.error(f"Unexpected error: {e}")
+        return func.HttpResponse(
+            "An unexpected error occurred.",
+            status_code=500
+        )
+
+def modify_and_send_document_logic(document_data):
+    """
+    Logic for modifying and sending the document.
+    :param document_data: The document data to modify and send.
+    :return: HttpResponse with the result.
+    """
+    doc_SendData=document_data.get("portalData", False)
+    logging.info(f"Document data to send (doc_SendData): {doc_SendData}")
+    try:
+        # Replace the 'id' field with 'requestForQuoteId'
+        doc_SendData["requestForQuoteId"] = doc_SendData.pop("id", None)
+
+        # Replace or add custom fields
+        doc_SendData["type"] = document_data["customFields"].get("type", "Quote")
+        if doc_SendData["type"] == "Quote":
+        # Felder entfernen, falls vorhanden
+            if "requisitionId" in doc_SendData:
+                doc_SendData.pop("requisitionId")
+            if "quoteId" in doc_SendData:
+                doc_SendData.pop("quoteId")
+            if "purchaseOrderId" in doc_SendData:
+                doc_SendData.pop("purchaseOrderId")
+        doc_SendData["discountCost"] = document_data["customFields"].get("discountCost", 0)
+        doc_SendData["subCost"] = document_data["customFields"].get("subCost", 45)
+        doc_SendData["cost"] = document_data["customFields"].get("cost", 45)
+        doc_SendData["termsAndConditions"] = document_data["customFields"].get(
+            "termsAndConditions", document_data.get("termsAndConditions", "")
+        )
+        doc_SendData["paymentTerms"] = document_data["customFields"].get(
+            "paymentTerms", document_data.get("paymentTerms", "")
+        )
+        doc_SendData["createdDate"] = document_data["customFields"].get(
+            "createdDate", datetime.utcnow().isoformat() + "Z"
+        )
+        doc_SendData["submittedDate"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
+        doc_SendData["quoteExpiryDate"] = document_data["customFields"].get(
+            "quoteExpiryDate", "2025-12-31T23:59:59"
+        )
+        doc_SendData["lineItems"] = document_data.get("lineItems", [])
+        doc_SendData["exported"] = True
+        json_string=json.dumps(doc_SendData, indent=4, ensure_ascii=False)
+        logging.info(f"Document data to send (JSON): {json_string}")
+       
+
+        # Fetch the token
+        token = get_token()
+        if not token:
+            return func.HttpResponse(
+                "Failed to fetch authentication token.",
+                status_code=500
+            )
+
+        # Define the API endpoint and headers
+        api_url = f"{shipserv_url}/order-management/documents"
+        headers = {
+            "Api-Version": "v2.1",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": f"Bearer {token}"
+        }
+
+        # Perform the POST request to send the modified document
+        response = requests.post(api_url, json=doc_SendData, headers=headers)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+
+        # Return the API response
+        return func.HttpResponse(
+            response.text,
+            mimetype="application/json",
+            status_code=response.status_code
+        )
+    except requests.exceptions.RequestException as e:
+        logging.error(response)
+        logging.error(f"Error during API call: {e}")
+        return func.HttpResponse(
+            "Error sending the document to the ShipServ API.",
+            status_code=500
+        )
+
+def mark_document_as_exported(doc_id, token):
+    """
+    Marks a document as exported via the ShipServ API.
+    """
+    url = f"{shipserv_url}/order-management/documents/{doc_id}/mark-as-exported"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    try:
+        response = requests.post(url, headers=headers)
+        response.raise_for_status()
+        return {"status": "success", "response": response.json()}
+    except requests.exceptions.RequestException as e:
+        return {"status": "error", "message": str(e)}
+
+@app.route(route="processFirstDocument", methods=["GET"])
+def process_first_document(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Fetches all documents (via shipserv_getDocuments), takes the first one,
+    processes it with shipserv_getDocument, and finally marks it as exported
+    only if the processing was successful.
+    """
+    try:
+        # Basis-URL ohne Route ermitteln:
+        url_parsed = urllib.parse.urlparse(req.url)
+        base_url = f"{url_parsed.scheme}://{url_parsed.netloc}"
+
+        # 1) Alle Dokumente abrufen
+        doc_type = "RequestForQuote"
+        docs_url = f"{base_url}/api/shipserv_getDocuments?DocType={doc_type}"
+        logging.info(f"Fetching documents from: {docs_url}")
+        docs_response = requests.get(docs_url)
+        docs_response.raise_for_status()
+
+        docs_json = docs_response.json()
+        logging.info(f"Fetched documents: {docs_json}") 
+        content = docs_json.get("content", [])
+        if not content:
+            return func.HttpResponse("No documents found.", status_code=404)
+
+        first_doc_id = content[0]["id"]
+
+        # 2) Dokument verarbeiten
+        processed_doc_url = f"{base_url}/api/shipserv_getDocument?id={first_doc_id}&erpTargets=collmex,sharepoint"
+        processed_doc_response = requests.get(processed_doc_url)
+        
+        # Wenn nicht erfolgreich -> abbrechen
+        if processed_doc_response.status_code != 200:
+            return func.HttpResponse(
+                f"Document {first_doc_id} could not be processed. Not exporting.",
+                status_code=processed_doc_response.status_code
+            )
+        
+        # 3) Nur bei erfolgreichem Schritt 2 -> Dokument auf 'exportiert' setzen
+        token = get_token()
+        export_result = mark_document_as_exported(first_doc_id, token or "")
+        #export_result = "noch nicht exportiert" 
+
+        return func.HttpResponse(
+            json.dumps({
+                "fetchedDocument": first_doc_id,
+                "processingResult": processed_doc_response.json(),
+                "exportResult": export_result
+            }),
+            mimetype="application/json",
+            status_code=200
+        )
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error in process_first_document: {e}")
+        return func.HttpResponse("Error occurred while processing.", status_code=500)
+
+@app.route(route="sendDataToPortalGet", methods=["GET"])
+def sendDataToPortalGet(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Simple GET-based wrapper to call sendDataToPortal logic.
+    Usage example (query params):
+        /api/sendDataToPortalGet?erpName=collmex&documentId=250782&documentType=Quote
+    """
+    erp_name = req.params.get("erpName")
+    document_id = req.params.get("documentId")
+    document_type = req.params.get("documentType")
+
+    if not erp_name or not document_id or not document_type:
+        return func.HttpResponse(
+            "Please provide 'erpName', 'documentId', and 'documentType' in the query string.",
+            status_code=400
+        )
+
+    # Baue ein JSON-Objekt wie im POST-Body
+    request_body = {
+        "erpName": erp_name,
+        "documentId": document_id,
+        "documentType": document_type,
+        "lineItems": [],
+        "customFields": {}
+    }
+
+    # Interner Aufruf der vorhandenen sendDataToPortal-Logik
+    class MockRequest:
+        def __init__(self, body):
+            self._body = body
+        def get_json(self):
+            return self._body
+
+    mock_req = MockRequest(request_body)
+    return sendDataToPortal(mock_req)
