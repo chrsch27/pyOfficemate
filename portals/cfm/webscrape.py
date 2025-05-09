@@ -7,6 +7,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import ElementClickInterceptedException
 from urllib.parse import unquote, urlparse
 import os
 import logging
@@ -22,7 +23,7 @@ logging.basicConfig(level=logging.INFO)
 print(selenium.__version__)
 app = Flask(__name__)
 
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 if not OPENAI_API_KEY:
   raise ValueError("No OpenAI API key found in environment variables")
 client = openai.OpenAI(api_key=OPENAI_API_KEY)
@@ -46,7 +47,7 @@ def start_gptAssistant(message):
   )
   logging.info(f"New thread created with ID: {thread.id}")
   return thread.id
-  
+
 
 def chat_gptAssistant(thread_id,user_input=None):
   if not thread_id:
@@ -63,7 +64,7 @@ def chat_gptAssistant(thread_id,user_input=None):
   run = client.beta.threads.runs.create(thread_id=thread_id,
                                         assistant_id=assistant_id)
   return (run.id)
-  
+
 
 def check_gptAssistant(thread_id, run_id):
   if not thread_id or not run_id:
@@ -191,10 +192,10 @@ def find_and_download_pdfs():
         return jsonify({"downloads": []})
 
 
-    
+
       download_elements = driver.find_elements(By.TAG_NAME, 
           "attachment")
-      
+
       logging.info(f"Found {len(download_elements)} download elements---------------")
       #logging.info(f"Download elements: {download_elements}")
       for element in download_elements:
@@ -221,7 +222,7 @@ def find_and_download_pdfs():
         # Wechsle zum neuen Tab
         new_window = [handle for handle in driver.window_handles if handle != original_window][0]
         driver.switch_to.window(new_window)
-        
+
         # Hole URL
         download_url = driver.current_url
         driver.close()
@@ -235,7 +236,7 @@ def find_and_download_pdfs():
         #logging.info(f"File content: {file_content}")
         filename = extract_filename(download_url)
         logging.info(f"Extracted filename: {filename}")
-        
+
         downloads.append({
             'filename': filename,
             'upload_date': upload_date,
@@ -266,6 +267,27 @@ def extract_filename(url):
   logging.info(f"Filename: {filename}")
   return unquote(filename)
 
+def wait_for_element_count_stabilization(driver, selector, timeout=30, stable_time=3):
+    """Wait until the count of elements matching the selector stops changing."""
+    start_time = time.time()
+    last_count = 0
+    last_change_time = start_time
+
+    while time.time() - start_time < timeout:
+        current_count = len(driver.find_elements(By.CSS_SELECTOR, selector))
+
+        if current_count != last_count:
+            # Count changed, reset the stable timer
+            last_count = current_count
+            last_change_time = time.time()
+        elif time.time() - last_change_time >= stable_time:
+            # Count has been stable for the required time
+            return current_count
+
+        time.sleep(0.5)
+
+    # Timeout reached, return whatever we have
+    return last_count
 
 @app.route('/scrape', methods=['GET'])
 def scrape():
@@ -274,27 +296,146 @@ def scrape():
         return jsonify({"error": "Please provide a valid URL parameter."}), 400
 
     chrome_options = Options()
-    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--window-size=1920,1080") 
     driver = webdriver.Chrome(options=chrome_options)
 
     try:
         driver.get(url)
-        time.sleep(10)  # Ggf. durch explizite Waits ersetzen
-        print (driver.title)
+        logging.info(f"Navigated to URL: {url}")
 
-        content_elements = driver.find_elements(By.CSS_SELECTOR, "content.answer-inquiry-content")
+        # Wait for sections to load
+        wait = WebDriverWait(driver, 30)
+        wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "section.inquiry-item")))
+        logging.info("Section elements found")
+
+        element_count = wait_for_element_count_stabilization(driver, "section.inquiry-item")
+        logging.info(f"Found {element_count} stable section elements")
         section_elements = driver.find_elements(By.CSS_SELECTOR, "section.inquiry-item")
 
+        content_elements = driver.find_elements(By.CSS_SELECTOR, "content.answer-inquiry-content")
+        
+
         answer_inquiry_list = [elem.text.strip() for elem in content_elements]
-        inquiry_items_list   = [elem.text.strip() for elem in section_elements]
+        inquiry_items_list = [elem.text.strip() for elem in section_elements]
+        logging.info(f"Found {len(content_elements)} content elements and {len(section_elements)} section elements")
+
+        inquiry_details = []
+        for i, item in enumerate(section_elements):
+            logging.info(f"Processing section {i+1}/{len(section_elements)}")
+            try:
+                # Find all clickable elements
+                buttons = item.find_elements(By.CLASS_NAME, "clickable")
+                logging.info(f"Found {len(buttons)} clickable elements in section {i+1}")
+                details_button = next((btn for btn in buttons if "Details" in btn.text), None)
+                logging.info(f"Details button found: {details_button is not None}")
+
+                if details_button:
+                    logging.info(f"Found Details button in section {i+1}")
+                    try:
+                        # Try using JavaScript to click the button to avoid interception issues
+                        driver.execute_script("arguments[0].click();", details_button)
+                        logging.info("Clicked Details button using JavaScript")
+
+                        # Wait for modal to open
+                        time.sleep(2)
+
+                        # First look for grid-cell with class "item-description"
+                        description_cell = None
+                        try:
+                            description_cell = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "grid-cell.item-description")))
+                            logging.info("Found item-description grid cell")
+                        except Exception:
+                            logging.warning(f"Could not find grid-cell.item-description in section {i+1}")
+
+                        # If found, look for the value element inside it
+                        value_text = None
+                        if description_cell:
+                            try:
+                                # Try to find the value element inside the description cell
+                                value_elem = description_cell.find_element(By.TAG_NAME, "value")
+                                value_text = value_elem.text.strip()
+                                logging.info(f"Found value element with text: {value_text[:30]}...")
+                                inquiry_details.append(value_text)
+                            except Exception as e:
+                                logging.warning(f"Could not find value element: {str(e)}")
+                                inquiry_details.append(f"Found item-description but no value element in section {i+1}")
+                        else:
+                            # Fallback to the original approach
+                            possible_selectors = [".item-description", "div.modal-content", "div.modal-body", ".modal-dialog"]
+                            modal_content = None
+
+                            for selector in possible_selectors:
+                                try:
+                                    modal = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, selector)))
+                                    modal_content = modal.text.strip()
+                                    logging.info(f"Found modal content using selector: {selector}")
+                                    break
+                                except Exception:
+                                    continue
+
+                            if modal_content:
+                                inquiry_details.append(f"Full modal content (no value element found): {modal_content}")
+                            else:
+                                inquiry_details.append(f"Modal found but no content extracted in section {i+1}")
+
+                        # Close modal - try multiple approaches
+                        try:
+                            # Try to find close button with various selectors
+                            close_selectors = [
+                                ".//button[contains(@class, 'close')]", 
+                                ".//button[contains(text(), 'Close')]",
+                                ".//button[contains(text(), 'Cancel')]", 
+                                ".close", 
+                                "[data-dismiss='modal']"
+                            ]
+
+                            close_button = None
+                            for selector in close_selectors:
+                                try:
+                                    if selector.startswith(".//"):
+                                        close_button = driver.find_element(By.XPATH, selector)
+                                    else:
+                                        close_button = driver.find_element(By.CSS_SELECTOR, selector)
+                                    break
+                                except:
+                                    continue
+
+                            if close_button:
+                                driver.execute_script("arguments[0].click();", close_button)
+                                logging.info("Clicked close button")
+                            else:
+                                # Click outside the modal or use Escape key
+                                driver.execute_script("document.body.click();")
+                                logging.info("Clicked outside modal")
+
+                            time.sleep(1)  # Brief pause to let modal close
+                        except Exception as e:
+                            logging.warning(f"Error closing modal: {str(e)}")
+                    except ElementClickInterceptedException:
+                        logging.warning(f"Button in section {i+1} was intercepted, trying to scroll to it")
+                        driver.execute_script("arguments[0].scrollIntoView(true);", details_button)
+                        time.sleep(1)
+                        driver.execute_script("arguments[0].click();", details_button)
+                    except Exception as e:
+                        inquiry_details.append(f"Error clicking Details button in section {i+1}: {str(e)}")
+                else:
+                    inquiry_details.append(f"No Details button found in section {i+1}")
+            except Exception as e:
+                inquiry_details.append(f"Error processing section {i+1}: {str(e)}")
+
+        logging.info(f"Inquiry details: {inquiry_details}")
+
 
         data = {
             "answer_inquiry_content": answer_inquiry_list,
-            "inquiry_items": inquiry_items_list
+            "inquiry_items": inquiry_items_list,
+            "inquiry_details": inquiry_details
         }
+        #return jsonify(data)
         thread_id=start_gptAssistant(json.dumps(data))
         run_id=chat_gptAssistant(thread_id)
         completed=False;
@@ -308,7 +449,7 @@ def scrape():
             time.sleep(4)
         logging.info(f"Run completed with status: {result['status']}")
         logging.info(f"Response: {result['response']}")
-           
+
         return jsonify(result)
 
     except Exception as e:

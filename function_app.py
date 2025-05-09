@@ -61,7 +61,7 @@ def get_token() -> str:
         logging.error(f"Error fetching token: {e}")
         return None
 
-@app.route(route="csitofficemate")
+@app.route(route="csitofficemate", methods=["GET"])
 def csitofficemate(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
 
@@ -82,7 +82,7 @@ def csitofficemate(req: func.HttpRequest) -> func.HttpResponse:
              status_code=200
         )
 
-@app.route(route="shipserv_getDocument")
+@app.route(route="shipserv_getDocument", methods=["GET"])
 def shipserv_getDocument(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function "getInquiry" processed a request.')
 
@@ -138,7 +138,7 @@ def shipserv_getDocument(req: func.HttpRequest) -> func.HttpResponse:
             status_code=500
         )
 
-@app.route(route="shipserv_getDocuments")
+@app.route(route="shipserv_getDocuments", methods=["GET"])
 def shipserv_getDocuments(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function "getDocuments" processed a request.')
 
@@ -159,7 +159,7 @@ def shipserv_getDocuments(req: func.HttpRequest) -> func.HttpResponse:
         )
 
     # Define the API endpoint and headers
-    api_url = f"{shipserv_url}/order-management/documents?type={doc_type}&submittedDate=2025-04-02"
+    api_url = f"{shipserv_url}/order-management/documents?type={doc_type}"
     headers = {
         'Accept': 'application/json',
         'Authorization': f"Bearer {token}"
@@ -488,3 +488,12 @@ def sendDataToPortalGet(req: func.HttpRequest) -> func.HttpResponse:
 
     mock_req = MockRequest(request_body)
     return sendDataToPortal(mock_req)
+
+def main(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Python HTTP trigger function processed a request.')
+
+    # Hier können Sie den Code für die Verarbeitung der Anfrage hinzufügen
+    return func.HttpResponse(
+        "This HTTP triggered function executed successfully.",
+        status_code=200
+    )
