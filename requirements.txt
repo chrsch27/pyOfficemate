@@ -5,3 +5,6 @@
 azure-functions
 selenium
 openai
+requests
+flask
+openai
