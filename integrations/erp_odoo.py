@@ -8,75 +8,115 @@ from io import StringIO
 #from integrations.erp_sharepoint import ERPsharepointIntegration
 import xmlrpc.client
 
-odoo_login = os.getenv("ODOO_LOGIN","Christoph Schmalisch")
-odoo_password = os.getenv("ODOO_PASSWORD","hueODO##2025")
-odoo_database = os.getenv("ODOO_DATABASE","factorship-ltd")
-odoo_api_url = os.getenv("ODOO_API_URL", "https://factorship-ltd1.odoo.com")
 
-common=xmlrpc.client.ServerProxy("https://factorship-ltd.odoo.com/xmlrpc/2/common")
 
-logging.info(common.version())
+def get_env_config():
+    """Get environment configuration and validate it"""
+    config = {
+        "USER": os.getenv("ODOO_LOGIN"),
+        "PASS": os.getenv("ODOO_PASSWORD"),
+        "URL": os.getenv("ODOO_URL", "https://factorship-ltd1.odoo.com"),
+        "DB": os.getenv("ODOO_DB")
+    }
+    
+    # Log configuration (masking password)
+    masked_config = {**config}
+    if masked_config["PASS"]:
+        masked_config["PASS"] = "********"
+    logging.info(f"Odoo configuration: {masked_config}")
+    
+    # Check for missing values
+    missing = [k for k, v in config.items() if not v]
+    if missing:
+        logging.error(f"Missing environment variables: {', '.join(missing)}")
+    
+    return config
 
-uid=common.authenticate(odoo_database, odoo_login, odoo_password, {})
-
-if uid:
-    logging.info(f"Authenticated to Odoo with user ID: {uid}")
-else:
-    logging.error("Failed to authenticate to Odoo. Check your credentials.")
-
-return_value = common.version()
-logging.info(f"Odoo version: {return_value}")
-
-class ERPcollmexIntegration:
-    @staticmethod
-    def send_to_erp(data):
-        """
-        Send data to the Collmex ERP system.
-        :param data: The data to send (formatted as required by Collmex).
-        :return: The response from the Collmex API.
-        """
-        logging.info("Sending document to ERP Collmex...")
-
-        # Collmex API URL
-        api_url = collmex_api_url
-
-        # Headers for the request
-        headers = {
-            "Content-Type": "text/csv",  # Collmex expects plain text
-        }
-
-        try:
-            # Send the POST request to Collmex
-            mydata = transformDataToCollmex(data)
-            logging.info(f"Data to send: {mydata}")
-            response = requests.post(api_url, data=mydata, headers=headers)
-            response.raise_for_status()  # Raise an exception for HTTP errors
-
-            # Log and return the response
-            logging.info(f"Document sent to ERP Collmex successfully: {response.status_code}")
-            logging.info(f"Response got from ERP Collmex: {response.text}")
-            erp_number = None
-            record_count = None
-
-            # Parse the response text
-            for line in response.text.splitlines():
-                if line.startswith("NEW_OBJECT_ID"):
-                    # Extract ERP number (second field)
-                    erp_number = line.split(";")[1]
-                elif line.startswith("MESSAGE"):
-                    # Extract record count (last part of the message)
-                    match = re.search(r"Es wurden (\d+) Datensätze verarbeitet", line)
-                    if match:
-                        record_count = int(match.group(1))
-
-            # Return the extracted values
-            return {
-                "ERPNummer": erp_number,
-                "Recordcount": record_count
-            }
-        except requests.exceptions.RequestException as e:
-            logging.error(f"Error sending document to ERP Collmex: {e}")
+def authenticate_odoo_xml():
+    """Authenticate to Odoo using XML-RPC."""
+    config = get_env_config()
+    
+    # Ensure URL has proper protocol
+    base_url = config["URL"]
+    if not base_url.startswith(('http://', 'https://')):
+        base_url = f"https://{base_url}"
+    
+    xml_rpc_url = f"{base_url}/xmlrpc/2/common"
+    logging.info(f"Authenticating to Odoo using XML-RPC: {xml_rpc_url}")
+    
+    try:
+        common = xmlrpc.client.ServerProxy(xml_rpc_url)
+        version_info = common.version()
+        logging.info(f"Connected to Odoo server version: {version_info}")
+        
+        uid = common.authenticate(config["DB"], config["USER"], config["PASS"], {})
+        if uid:
+            logging.info(f"Authentication successful, user ID: {uid}")
+            return uid
+        else:
+            logging.error("Authentication failed. Check credentials.")
             return None
+    except Exception as e:
+        logging.error(f"Authentication error: {str(e)}")
+        return None
+
+class ERPodooIntegration:
+    @staticmethod
+    def send_to_erp(data,customer=None):
+        uid = authenticate_odoo_xml()
+        if not uid:
+            logging.error("Authentication failed. Cannot create offer.")
+            return None
+        
+        config = get_env_config()
+        models = xmlrpc.client.ServerProxy(f"{config['URL']}/xmlrpc/2/object")
+        if not customer:
+            if data:
+                customer = data.get('company')
+                if not customer:
+                    logging.error("No customer name provided in data.")
+                    return None
+            else:
+                logging.error("No customer name provided.")
+                return None
+
+        customer_ids = models.execute_kw(config["DB"], uid, config["PASS"], 'res.partner', 'search', [[('name', 'like', customer)]])
+        if not customer_ids:    
+            customer_id = models.execute_kw(config["DB"], uid, config["PASS"], 'res.partner', 'create', [{'name': customer}])
+            logging.info(f"Customer '{customer}' created with ID: {customer_id}")   
+        else:
+            customer_id = customer_ids[0]
+            logging.info(f"Customer '{customer}' already exists with ID: {customer_id}")
+
+        vals = {
+        'partner_id': customer_id,
+        'order_line': []
+        }
+        recordCount = 0
+        # Add optional fields if provided in data
+        if data:
+            if 'documentDate' in data:
+                vals['date_order'] = data['documentDate']
+            if 'note' in data:
+                vals['note'] = data['note']
+            if 'documentNo' in data:
+                vals['client_order_ref'] = data['documentNo']
+                
+            # Add products from the data
+            if 'items' in data and isinstance(data['items'], list):
+                for product in data['items']:
+                    line = (0, 0, {
+                        'product_id': 3,
+                        'product_uom_qty': product.get('Quantity', 1),
+                        'name': f"{product.get('ItemNumber', '')} {product.get('Description', '')}",
+                        'price_unit': product.get('UnitPrice', 0)
+                    })
+                    vals['order_line'].append(line)
+                    recordCount += 1
+
+        offer_id = models.execute_kw(config["DB"], uid, config["PASS"], 'sale.order', 'create', [vals])
+        logging.info(f"Offer created with ID: {offer_id}")
+        return offer_id, recordCount
 
     @staticmethod
     def fetch_document(document_id, document_type):
@@ -193,7 +233,7 @@ def transformDataToCollmex(data):
     """
     try:
         # Start with the LOGIN line
-        login_line = f"LOGIN;{collmex_login};{collmex_password}"
+        #login_line = f"LOGIN;{collmex_login};{collmex_password}"
         document_id = data.get("Belegnr", "-10000")
         firma = "1 Hamburg Factorship GmbH"
         id_kunde = "10033"
@@ -204,7 +244,7 @@ def transformDataToCollmex(data):
         offer_text = "We herewith offer according to Orgalime S2012-conditions."
         end_text = "Time of delivery: \n Terms of delivery: ex works \n Validity: 2 months after offer"
 
-        csv_content = [login_line]
+        #csv_content = [login_line]
         logging.info(f"Data: {data}")
 
         # Create the document header (CMXQTN)
