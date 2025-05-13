@@ -11,6 +11,7 @@ from dispatcher import register_erp_integration
 from integrations.erp_collmex import ERPcollmexIntegration
 from integrations.erp_pds import ERPpdsIntegration
 from integrations.erp_sharepoint import ERPsharepointIntegration
+from integrations.erp_odoo import ERPodooIntegration
 import urllib.parse
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
@@ -28,6 +29,7 @@ def initialize_erp_integrations():
     register_erp_integration("collmex", ERPcollmexIntegration)
     register_erp_integration("sharepoint", ERPsharepointIntegration)
     register_erp_integration("pds", ERPpdsIntegration)
+    register_erp_integration("odoo", ERPodooIntegration)
 
 # Initialisierung aufrufen
 initialize_erp_integrations()
@@ -488,6 +490,69 @@ def sendDataToPortalGet(req: func.HttpRequest) -> func.HttpResponse:
 
     mock_req = MockRequest(request_body)
     return sendDataToPortal(mock_req)
+
+@app.route(route="createOfferOdoo", methods=["POST"])
+def create_oddo_offer(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Create an offer in Odoo.
+    :param data: The data for the offer.
+    :param customer: Optional customer information.
+    :return: The response from the Odoo API.
+    """
+    try:
+        request_body = req.get_json()
+        data = request_body.get("data")
+        customer = request_body.get("customer")
+        
+        if not data:
+            return func.HttpResponse(
+                "Please provide 'data' in the request body.",
+                status_code=400
+            )
+        
+        # Create the offer in Odoo
+        result = ERPodooIntegration.send_to_erp(data, customer)
+        
+        # Handle None result (integration failure)
+        if result is None:
+            logging.error("Odoo integration returned None")
+            return func.HttpResponse(
+                "Failed to create offer in Odoo: Integration error",
+                status_code=500
+            )
+            
+        # Safely unpack the tuple
+        offer_id, count = result
+        logging.info(f"Offer created with ID: {offer_id}")
+        
+        if not offer_id:
+            return func.HttpResponse(
+                "Failed to create offer in Odoo: No offer ID returned",
+                status_code=500
+            )
+            
+        # Success response
+        return func.HttpResponse(
+            json.dumps({
+                "success": True,
+                "offer_id": offer_id,
+                "item_count": count
+            }),
+            mimetype="application/json",
+            status_code=201
+        )
+    except ValueError as e:
+        logging.error(f"JSON parsing error: {str(e)}")
+        return func.HttpResponse(
+            f"Invalid request format: {str(e)}",
+            status_code=400
+        )
+    except Exception as e:
+        logging.error(f"Error creating offer in Odoo: {str(e)}")
+        return func.HttpResponse(
+            f"Error creating offer: {str(e)}",
+            status_code=500
+        )
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function processed a request.')
