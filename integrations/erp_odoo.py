@@ -5,7 +5,7 @@ import re
 from datetime import datetime
 import csv
 from io import StringIO
-#from integrations.erp_sharepoint import ERPsharepointIntegration
+from integrations.erp_sharepoint import ERPsharepointIntegration
 import xmlrpc.client
 
 
@@ -62,61 +62,351 @@ def authenticate_odoo_xml():
 
 class ERPodooIntegration:
     @staticmethod
-    def send_to_erp(data,customer=None):
+    def send_to_erp(data, customer=None):
+        """
+        Create or update an offer in Odoo.
+        
+        Args:
+            data: Dictionary containing offer data
+            customer: Optional customer name override
+                
+        Returns:
+            Tuple of (offer_id, record_count) or None if error occurs
+        """
+        # Validate that data is a dictionary
+        if data is None:
+            logging.error("No data provided to send_to_erp")
+            return 0, 0
+            
+        if not isinstance(data, dict):
+            logging.error(f"Expected dictionary for data, got {type(data).__name__}: {data}")
+            return 0, 0
+        
         uid = authenticate_odoo_xml()
         if not uid:
             logging.error("Authentication failed. Cannot create offer.")
-            return None
+            return 0, 0
         
         config = get_env_config()
-        models = xmlrpc.client.ServerProxy(f"{config['URL']}/xmlrpc/2/object")
+        # Create XML-RPC client with allow_none=True
+        models = xmlrpc.client.ServerProxy(
+            f"{config['URL']}/xmlrpc/2/object",
+            allow_none=True  # Enable None values in XML-RPC calls
+        )
+        
+        # Extract key information (with safe defaults)
+        document_type = data.get('documentType', '')
+        reference_no = data.get('referencNo', '')
+        
+        # Check if this is a quotation with a reference to an existing offer
+        existing_offer_id = None
+        if document_type == 'Quotation' and reference_no:
+            logging.info(f"Processing quotation with reference: {reference_no}")
+            
+            # Try to extract an offer number from the reference
+            # Common patterns: "Ref: SO0001", "Quote #SO0001", "Your Ref: SO0001", etc.
+            potential_refs = []
+            
+            # Look for Odoo sale order references (typically start with SO)
+            # Get patterns from configuration to avoid hardcoding
+            reference_patterns = os.getenv("OFFER_REFERENCE_PATTERNS", "(SO\\d+|CY-S\\d+)").split('|')
+            combined_pattern = f"({'|'.join(reference_patterns)})"
+            so_matches = re.findall(combined_pattern, reference_no)
+            potential_refs.extend(so_matches)
+            
+            # Look for numeric references with common prefixes
+            num_pattern = r'(?:ref|reference|quote|quotation|offer|#)[:\s]*(\d+)'
+            num_matches = re.findall(num_pattern, reference_no, re.IGNORECASE)
+            potential_refs.extend(num_matches)
+            
+            # If we found potential references, try to find the corresponding offer
+            for ref in potential_refs:
+                logging.info(f"Checking for existing offer with reference: {ref}")
+                offer = ERPodooIntegration.find_offer_by_number(ref)
+                if offer:
+                    existing_offer_id = offer['id']
+                    logging.info(f"Found existing offer: {existing_offer_id}")
+                    break
+        
+        # If we found an existing offer, update it instead of creating a new one
+        if existing_offer_id:
+            return ERPodooIntegration.update_existing_offer(existing_offer_id, data)
+        
+        # Continue with regular offer creation process if no existing offer found
         if not customer:
             if data:
                 customer = data.get('company')
+                customername = customer['name']
                 if not customer:
                     logging.error("No customer name provided in data.")
                     return None
             else:
                 logging.error("No customer name provided.")
                 return None
-
-        customer_ids = models.execute_kw(config["DB"], uid, config["PASS"], 'res.partner', 'search', [[('name', 'like', customer)]])
+        
+        # Find or create customer
+        customer_ids = models.execute_kw(config["DB"], uid, config["PASS"], 
+                                         'res.partner', 'search', 
+                                         [[('name', 'like', customername)]])
         if not customer_ids:    
-            customer_id = models.execute_kw(config["DB"], uid, config["PASS"], 'res.partner', 'create', [{'name': customer}])
+            customer_id = models.execute_kw(config["DB"], uid, config["PASS"], 
+                                            'res.partner', 'create', [{'name': customername, 'email':customer['email'], 'contact_address': customer.get('street', '') + ', ' + customer.get('city', '') + ' ' + customer.get('postalcode', '')+ ' ' + customer.get('country', '')}])
             logging.info(f"Customer '{customer}' created with ID: {customer_id}")   
         else:
             customer_id = customer_ids[0]
             logging.info(f"Customer '{customer}' already exists with ID: {customer_id}")
 
+        # Prepare sale order values with defaults for None values
         vals = {
-        'partner_id': customer_id,
-        'order_line': []
+            'partner_id': customer_id,
+            'x_studio_vessel': data.get('vesselName', ''),
+            'x_studio_imo': data.get('imoNumber', ''),
+            'client_order_ref': data.get('documentNo', ''),
+            'order_line': []
         }
-        recordCount = 0
+
+        # Handle specifications data safely
+        if data and 'specifications' in data:
+            specs = data['specifications']
+            if not isinstance(specs, list):
+                logging.warning(f"Expected list for specifications, got {type(specs).__name__}")
+                vals['x_studio_specification'] = ""
+            else:
+                # Format specifications as a readable string
+                spec_details = []
+                for spec in specs:
+                    if not isinstance(spec, dict):
+                        logging.warning(f"Expected dictionary for specification, got {type(spec).__name__}")
+                        continue
+                        
+                    if spec.get('Manufacturer'):
+                        spec_details.append(f"Manufacturer: {spec['Manufacturer']}")
+                    if spec.get('PartType'):
+                        spec_details.append(f"Part Type: {spec['PartType']}")
+                    if spec.get('PartTypeNumber'):
+                        spec_details.append(f"Part Number: {spec['PartTypeNumber']}")
+                
+                # Join all specifications with line breaks
+                vals['x_studio_specification'] = "\n".join(spec_details)
+        else:
+            vals['x_studio_specification'] = ""
+
+        record_count = 0
         # Add optional fields if provided in data
         if data:
             if 'documentDate' in data:
-                vals['date_order'] = data['documentDate']
+                vals['date_order'] = data['documentDate'] or datetime.now().strftime('%Y-%m-%d')
             if 'note' in data:
-                vals['note'] = data['note']
+                vals['note'] = data['note'] or ''
             if 'documentNo' in data:
-                vals['client_order_ref'] = data['documentNo']
+                vals['client_order_ref'] = data['documentNo'] or ''
+            if 'vesselName' in data:
+                vals['note'] = vals.get('note', '') + f"\nVessel: {data['vesselName']}"
                 
-            # Add products from the data
+            # Add products from the data with defaults for None values
             if 'items' in data and isinstance(data['items'], list):
                 for product in data['items']:
+                    # Handle null values with defaults
+                    quantity = product.get('Quantity') or 1.0
+                    unit_price = product.get('UnitPrice') or 0.0
+                    description = product.get('Description', '')
+                    item_number = product.get('ItemNumber', '')
+                    
+                    # Get specification data if available
+                    spec_info = ""
+                    if product.get('specification'):
+                        spec = product['specification']
+                        if spec.get('Manufacturer'):
+                            spec_info += f"Manufacturer: {spec['Manufacturer']}\n"
+                        if spec.get('PartType'):
+                            spec_info += f"Part Type: {spec['PartType']}\n"
+                        if spec.get('PartTypeNumber'):
+                            spec_info += f"Part Number: {spec['PartTypeNumber']}\n"
+                    
+                    # Create complete description
+                    full_description = f"{item_number} {description}"
+                    if spec_info:
+                        full_description += f"\n\n{spec_info}"
+                    
                     line = (0, 0, {
-                        'product_id': 3,
-                        'product_uom_qty': product.get('Quantity', 1),
-                        'name': f"{product.get('ItemNumber', '')} {product.get('Description', '')}",
-                        'price_unit': product.get('UnitPrice', 0)
+                        'product_id': 3,  # Default product ID
+                        'product_uom_qty': float(quantity) if quantity else 1.0,
+                        'name': full_description,
+                        'price_unit': float(unit_price) if unit_price else 0.0
                     })
                     vals['order_line'].append(line)
-                    recordCount += 1
+                    record_count += 1
 
-        offer_id = models.execute_kw(config["DB"], uid, config["PASS"], 'sale.order', 'create', [vals])
-        logging.info(f"Offer created with ID: {offer_id}")
-        return offer_id, recordCount
+        try:
+            # Create the sales order
+            offer_id = models.execute_kw(config["DB"], uid, config["PASS"], 
+                                         'sale.order', 'create', [vals])
+            logging.info(f"Offer created with ID: {offer_id}")
+            # Fetch the new offer to get its number (name)
+            offer_data = models.execute_kw(config["DB"], uid, config["PASS"], 
+                                           'sale.order', 'read', 
+                                           [offer_id], 
+                                           {'fields': ['name']})
+            offer_number = offer_data[0]['name'] if offer_data and 'name' in offer_data[0] else ""
+            return offer_id, record_count, offer_number
+           
+        except Exception as e:
+            logging.error(f"Error creating offer in Odoo: {str(e)}")
+            # Return explicit tuple to avoid None value issues
+            return 0, 0
+
+    @staticmethod
+    def update_existing_offer(offer_id, data):
+        """
+        Update an existing offer with new price information.
+        
+        Args:
+            offer_id: The ID of the existing offer to update
+            data: The new quotation data with prices
+                
+        Returns:
+            Tuple of (offer_id, updated_count) or None if error occurs
+        """
+        uid = authenticate_odoo_xml()
+        if not uid:
+            logging.error("Authentication failed. Cannot update offer.")
+            return None
+        
+        config = get_env_config()
+        models = xmlrpc.client.ServerProxy(
+            f"{config['URL']}/xmlrpc/2/object",
+            allow_none=True
+        )
+        offer_data = models.execute_kw(config["DB"], uid, config["PASS"], 
+                                           'sale.order', 'read', 
+                                           [offer_id], 
+                                           {'fields': ['name']})
+        offer_number = offer_data[0]['name'] if offer_data and 'name' in offer_data[0] else ""
+        try:
+            # Get existing offer lines
+            line_ids = models.execute_kw(config["DB"], uid, config["PASS"],
+                'sale.order.line', 'search',
+                [[('order_id', '=', int(offer_id))]]
+            )
+            
+            existing_lines = models.execute_kw(config["DB"], uid, config["PASS"],
+                'sale.order.line', 'read',
+                [line_ids],
+                {'fields': ['product_id', 'name', 'product_uom_qty', 'price_unit', 'sequence']}
+            )
+            
+            # Create a mapping of names to line IDs for easier matching
+            line_map = {line['name'].strip(): line['id'] for line in existing_lines}
+            line_sequence_map = {line['sequence']: line['id'] for line in existing_lines if 'sequence' in line}
+            
+            # Track how many lines we update
+            updated_count = 0
+            
+            # Process new items from the quotation
+            if 'items' in data and isinstance(data['items'], list):
+                for item in data['items']:
+                    item_number = item.get('ItemNumber', '')
+                    description = item.get('Description', '')
+                    position = item.get('Position', 0)
+                    unit_price = item.get('UnitPrice')
+                    
+                    if unit_price is None:
+                        logging.warning(f"Skipping item {item_number} - no price provided")
+                        continue
+                    
+                    # Try to match by various criteria
+                    matched_line_id = None
+                    
+                    # 1. Match by full name (ItemNumber + Description)
+                    full_name = f"{item_number} {description}".strip()
+                    if full_name in line_map:
+                        matched_line_id = line_map[full_name]
+                    
+                    # 2. Match by position/sequence
+                    elif position and position in line_sequence_map:
+                        matched_line_id = line_sequence_map[position]
+                    
+                    # 3. Match by description only
+                    elif description in line_map:
+                        matched_line_id = line_map[description]
+                    
+                    # 4. Match by item number only
+                    elif item_number and any(item_number in key for key in line_map):
+                        matching_keys = [key for key in line_map if item_number in key]
+                        if matching_keys:
+                            matched_line_id = line_map[matching_keys[0]]
+                    
+                    # If we found a matching line, update its price
+                    if matched_line_id:
+                        models.execute_kw(config["DB"], uid, config["PASS"],
+                            'sale.order.line', 'write',
+                            [[matched_line_id], {'price_unit': float(unit_price)}]
+                        )
+                        updated_count += 1
+                        logging.info(f"Updated price for item {item_number} {description} to {unit_price}")
+                    else:
+                        logging.info(f"No matching line found for {item_number} {description}. Adding as new line.")
+                        
+                        # Create specification info if available
+                        spec_info = ""
+                        if item.get('specification'):
+                            spec = item['specification']
+                            if spec.get('Manufacturer'):
+                                spec_info += f"Manufacturer: {spec['Manufacturer']}\n"
+                            if spec.get('PartType'):
+                                spec_info += f"Part Type: {spec['PartType']}\n"
+                            if spec.get('PartTypeNumber'):
+                                spec_info += f"Part Number: {spec['PartTypeNumber']}\n"
+                        
+                        # Create complete description
+                        full_description = f"{item_number} {description}"
+                        if spec_info:
+                            full_description += f"\n\n{spec_info}"
+                        
+                        # Add the new line to the existing offer
+                        # Format: (0, 0, vals) for create operation in one2many fields
+                        new_line = {
+                            'order_id': int(offer_id),
+                            'product_id': 3,  # Default product ID
+                            'product_uom_qty': float(item.get('Quantity') or 1.0),
+                            'name': full_description,
+                            'price_unit': float(unit_price)
+                        }
+                        
+                        try:
+                            new_line_id = models.execute_kw(config["DB"], uid, config["PASS"],
+                                'sale.order.line', 'create', [new_line]
+                            )
+                            updated_count += 1
+                            logging.info(f"Added new line with ID {new_line_id} for item {item_number} {description}")
+                        except Exception as line_err:
+                            logging.error(f"Failed to add new line for {item_number}: {str(line_err)}")
+            
+            # Update the offer status if we made changes
+            if updated_count > 0:
+                # Add a note about the price update
+                existing_note = models.execute_kw(config["DB"], uid, config["PASS"],
+                    'sale.order', 'read',
+                    [int(offer_id)],
+                    {'fields': ['note']}
+                )[0].get('note', '')
+                
+                update_note = f"{existing_note}\n\nPrices updated on {datetime.now().strftime('%Y-%m-%d')} from quotation reference: {data.get('documentNo', 'Unknown')}"
+                
+                models.execute_kw(config["DB"], uid, config["PASS"],
+                    'sale.order', 'write',
+                    [[int(offer_id)], {'note': update_note}]
+                )
+                
+                logging.info(f"Updated {updated_count} items in offer {offer_id}")
+            else:
+                logging.warning(f"No items were updated in offer {offer_id}")
+            
+            return int(offer_id), updated_count, offer_number
+        
+        except Exception as e:
+            logging.error(f"Error updating existing offer: {str(e)}")
+            return 0, 0
 
     @staticmethod
     def fetch_document(document_id, document_type):
@@ -132,7 +422,7 @@ class ERPodooIntegration:
         logging.info(f"PortalData fetched: {portalData}")
 
         api_url = "https://www.collmex.de/c.cmx?170095,0,data_exchange"
-        request_body = f"LOGIN;{collmex_login};{collmex_password}\nQUOTATION_GET;{document_id}"
+        request_body = f""
         headers = {"Content-Type": "text/csv"}
 
         try:
@@ -225,52 +515,136 @@ class ERPodooIntegration:
             logging.error(f"Error fetching document from Collmex: {e}")
             return None
 
-def transformDataToCollmex(data):
-    """
-    Transform JSON data into Collmex CSV format (semicolon-separated).
-    :param data: The JSON data to transform.
-    :return: A string in Collmex CSV format.
-    """
-    try:
-        # Start with the LOGIN line
-        #login_line = f"LOGIN;{collmex_login};{collmex_password}"
-        document_id = data.get("Belegnr", "-10000")
-        firma = "1 Hamburg Factorship GmbH"
-        id_kunde = "10033"
-        payment_terms = "0 30 Tage ohne Abzug"
-        currency = "EUR"
-        delivery_terms = "0 Standard"
-        preis_gruppe = "0 Standard"
-        offer_text = "We herewith offer according to Orgalime S2012-conditions."
-        end_text = "Time of delivery: \n Terms of delivery: ex works \n Validity: 2 months after offer"
-
-        #csv_content = [login_line]
-        logging.info(f"Data: {data}")
-
-        # Create the document header (CMXQTN)
-        document_line = (
-            f"CMXQTN;{document_id};;0;{firma};{id_kunde};;;;;;;;;;;;;;;;;;;;;;0;20250329;;{payment_terms};{currency};{preis_gruppe}"
-            f";0;0,00;;\"{offer_text}\";\"{end_text}\";;0;;1;0;0;0,00;;0 Neu;;0;0,00;0,00;;;;;;;;;;;;;;;;;;0"
-        )
-
-        # Add line items for the document
-        for item in data.get("lineItems", []):
-            description = item['description']
-            number = item['number']
-            unit_of_measure = item.get('unitOfMeasure', 'PCE')
-            quantity = item['quantity']
-            unit_price = item['unitPrice']
-            item_line = (
-                f"{document_line};;{number} {description};"
-                f"{unit_of_measure};{quantity};{unit_price};1;0,00;;0;0;0;0;;;;;;"
+    @staticmethod
+    def get_offer(offer_id):
+        """
+        Ruft ein Angebot (sale.order) von Odoo anhand der ID ab.
+        
+        Args:
+            offer_id: ID des Angebots in Odoo
+            
+        Returns:
+            Ein Dictionary mit den Angebotsdaten oder None bei Fehlern
+        """
+        uid = authenticate_odoo_xml()
+        if not uid:
+            logging.error("Authentication failed. Cannot fetch offer.")
+            return None
+        
+        config = get_env_config()
+        models = xmlrpc.client.ServerProxy(f"{config['URL']}/xmlrpc/2/object")
+        
+        try:
+            # Angebotsdaten abrufen
+            offer_data = models.execute_kw(config["DB"], uid, config["PASS"], 
+                'sale.order', 'read', 
+                [int(offer_id)], 
+                {'fields': ['name', 'date_order', 'partner_id', 'client_order_ref', 'note', 'amount_total', 'state']}
             )
-            csv_content.append(item_line)
+            
+            if not offer_data:
+                logging.error(f"No offer found with ID: {offer_id}")
+                return None
+                
+            offer = offer_data[0]
+            
+            # Angebotszeilen abrufen
+            line_ids = models.execute_kw(config["DB"], uid, config["PASS"],
+                'sale.order.line', 'search',
+                [[('order_id', '=', int(offer_id))]]
+            )
+            
+            offer_lines = models.execute_kw(config["DB"], uid, config["PASS"],
+                'sale.order.line', 'read',
+                [line_ids],
+                {'fields': ['product_id', 'name', 'product_uom_qty', 'price_unit', 'price_subtotal']}
+            )
+            
+            # Kundendaten abrufen
+            customer_id = offer['partner_id'][0]
+            customer_data = models.execute_kw(config["DB"], uid, config["PASS"],
+                'res.partner', 'read',
+                [customer_id],
+                {'fields': ['name', 'street', 'city', 'zip', 'email', 'phone']}
+            )
+            
+            # Strukturiertes Ergebnis zusammenstellen
+            result = {
+                "id": offer_id,
+                "reference": offer['name'],
+                "status": offer['state'],
+                "documentDate": offer['date_order'],
+                "documentNo": offer.get('client_order_ref', ''),
+                "note": offer.get('note', ''),
+                "totalAmount": offer['amount_total'],
+                "company": customer_data[0]['name'],
+                "customerDetails": {
+                    "name": customer_data[0]['name'],
+                    "street": customer_data[0].get('street', ''),
+                    "city": customer_data[0].get('city', ''),
+                    "zip": customer_data[0].get('zip', ''),
+                    "email": customer_data[0].get('email', ''),
+                    "phone": customer_data[0].get('phone', '')
+                },
+                "items": []
+            }
+            
+            # Produktzeilen hinzufügen
+            for line in offer_lines:
+                result["items"].append({
+                    "ItemNumber": line['product_id'][0],
+                    "Description": line['name'],
+                    "Quantity": line['product_uom_qty'],
+                    "UnitPrice": line['price_unit'],
+                    "TotalPrice": line['price_subtotal']
+                })
+                
+            logging.info(f"Successfully retrieved offer {offer_id} with {len(result['items'])} line items")
+            return result
+            
+        except Exception as e:
+            logging.error(f"Error fetching offer from Odoo: {str(e)}")
+            return None
 
-        # Return joined CSV
-        return "\n".join(csv_content)
-    except KeyError as e:
-        logging.error(f"Missing key in data: {e}")
-        raise ValueError(f"Invalid data format: Missing key {e}")
-    except Exception as e:
-        logging.error(f"Error transforming data to Collmex format: {e}")
-        raise
+    @staticmethod
+    def find_offer_by_number(offer_number):
+        """
+        Sucht und ruft ein Angebot (sale.order) von Odoo anhand der Angebotsnummer (name) ab.
+        
+        Args:
+            offer_number: Angebotsnummer (im Feld 'name') in Odoo
+                
+        Returns:
+            Ein Dictionary mit den Angebotsdaten oder None bei Fehlern/nicht gefunden
+        """
+        uid = authenticate_odoo_xml()
+        if not uid:
+            logging.error("Authentication failed. Cannot search for offer.")
+            return None
+        
+        config = get_env_config()
+        models = xmlrpc.client.ServerProxy(f"{config['URL']}/xmlrpc/2/object")
+        
+        try:
+            # Nach Angebot mit der angegebenen Nummer suchen
+            offer_ids = models.execute_kw(config["DB"], uid, config["PASS"], 
+                'sale.order', 'search', 
+                [[('name', '=', offer_number)]], 
+                {'limit': 1}
+            )
+            
+            if not offer_ids:
+                logging.info(f"No offer found with number: {offer_number}")
+                return None
+                
+            # Den ersten gefundenen Datensatz verwenden
+            offer_id = offer_ids[0]
+            logging.info(f"Found offer with ID: {offer_id} for number: {offer_number}")
+            
+            # Die vorhandene get_offer-Funktion verwenden, um die Daten abzurufen
+            return ERPodooIntegration.get_offer(offer_id)
+            
+        except Exception as e:
+            logging.error(f"Error searching for offer by number in Odoo: {str(e)}")
+            return None
+

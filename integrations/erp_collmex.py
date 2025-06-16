@@ -199,11 +199,42 @@ def transformDataToCollmex(data):
 
         # Add line items for the document
         for item in data.get("lineItems", []):
-            description = item['description']
-            number = item['number']
+            # Beschreibung mit Zeilenumbrüchen durch Pipe-Zeichen ersetzen
+            raw_description = item.get('description', '')
+            description = raw_description.replace('\r\n', '|').replace('\n', '|').replace('\r', '|') if raw_description else ""
+            
+            # Equipment-Section in die Beschreibung integrieren, falls vorhanden
+            if 'equipmentSection' in item:
+                equip = item['equipmentSection']
+                equip_details = []
+                
+                # Equipment-Details sammeln
+                if equip.get('name'):
+                    equip_details.append(f"Equipment: {equip.get('name')}")
+                if equip.get('accountNumber'):
+                    equip_details.append(f"Account: {equip.get('accountNumber')}")
+                if equip.get('serialNumber'):
+                    equip_details.append(f"Serial: {equip.get('serialNumber')}")
+                if equip.get('manufacturer'):
+                    equip_details.append(f"Manufacturer: {equip.get('manufacturer')}")
+                if equip.get('modelNumber'):
+                    equip_details.append(f"Model: {equip.get('modelNumber')}")
+                if equip.get('departmentType'):
+                    equip_details.append(f"Department: {equip.get('departmentType')}")
+                
+                # Equipment-Details zur Beschreibung hinzufügen (mit Pipe als Trennzeichen)
+                if equip_details:
+                    equipment_text = " | ".join(equip_details)
+                    # Zeilenumbrüche in Equipment-Details ersetzen
+                    equipment_text = equipment_text.replace('\r\n', '|').replace('\n', '|').replace('\r', '|')
+                    
+                    # Zur Beschreibung hinzufügen
+                    description = f"{description} | {equipment_text}" if description else equipment_text
+            
+            number = item.get('number', '')
             unit_of_measure = item.get('unitOfMeasure', 'PCE')
-            quantity = item['quantity']
-            unit_price = item['unitPrice']
+            quantity = item.get('quantity', 0)
+            unit_price = item.get('unitPrice', 0)
             item_line = (
                 f"{document_line};;{number} {description};"
                 f"{unit_of_measure};{quantity};{unit_price};1;0,00;;0;0;0;0;;;;;;"

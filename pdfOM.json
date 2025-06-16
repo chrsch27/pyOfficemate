@@ -1,0 +1,355 @@
+
+{
+    "company": "ANGLOTECH S.R.L.",
+    "documentType": "quotation",
+    "documentNo": "QU-250970",
+    "documentDate": "2025-05-08",
+    "vesselName": null,
+    "ItemsCount": 24,
+    "referencNo": "25-C9-N30356",
+    "specifications": [
+        {
+            "Manufacturer": "HATLAPA",
+            "PartType": "AIR COMPRESSOR",
+            "PartTypeNumber": "L 350"
+        }
+    ],
+    "items": [
+        {
+            "Position": 1,
+            "ItemNumber": "10.30.150.10",
+            "Description": "EXCHANGE FILTER",
+            "Quantity": 2,
+            "UnitPrice": 9.12,
+            "TotalPrice": 14.59,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 2,
+            "ItemNumber": "20.10.20",
+            "Description": "GASKET",
+            "Quantity": 4,
+            "UnitPrice": 3.39,
+            "TotalPrice": 10.85,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 3,
+            "ItemNumber": "20.10.100",
+            "Description": "GASKET",
+            "Quantity": 2,
+            "UnitPrice": 3.18,
+            "TotalPrice": 5.09,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 4,
+            "ItemNumber": "20.10.180",
+            "Description": "GASKET",
+            "Quantity": 2,
+            "UnitPrice": 3.18,
+            "TotalPrice": 5.09,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 5,
+            "ItemNumber": "20.20.10",
+            "Description": "COMB SUCT+PRESS. VLV 1ST",
+            "Quantity": 4,
+            "UnitPrice": 490.00,
+            "TotalPrice": 1568.00,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 6,
+            "ItemNumber": "20.20.20",
+            "Description": "GASKET FOR 1ST STAGE VLV",
+            "Quantity": 8,
+            "UnitPrice": 12.62,
+            "TotalPrice": 80.77,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 7,
+            "ItemNumber": "20.20.30",
+            "Description": "O RING 1ST STAGE VLV",
+            "Quantity": 8,
+            "UnitPrice": 3.54,
+            "TotalPrice": 22.66,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 8,
+            "ItemNumber": "20.20.40",
+            "Description": "PACKING 1ST VALVE",
+            "Quantity": 8,
+            "UnitPrice": 32.00,
+            "TotalPrice": 204.80,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 9,
+            "ItemNumber": "20.20.50",
+            "Description": "COMB SUCT+PRESS. VLV 2ND",
+            "Quantity": 2,
+            "UnitPrice": 460.00,
+            "TotalPrice": 736.00,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 10,
+            "ItemNumber": "20.20.60",
+            "Description": "PACKING RING",
+            "Quantity": 4,
+            "UnitPrice": 10.61,
+            "TotalPrice": 33.95,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 11,
+            "ItemNumber": "20.20.70",
+            "Description": "O RING",
+            "Quantity": 4,
+            "UnitPrice": 1.60,
+            "TotalPrice": 5.12,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 12,
+            "ItemNumber": "20.20.80",
+            "Description": "PACKING RING",
+            "Quantity": 1,
+            "UnitPrice": 10.61,
+            "TotalPrice": 8.49,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 13,
+            "ItemNumber": "20.20.90",
+            "Description": "COMB SUCT+PRESS VLV 3RD",
+            "Quantity": 2,
+            "UnitPrice": 256.67,
+            "TotalPrice": 410.67,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 14,
+            "ItemNumber": "20.20.100",
+            "Description": "PACKING RING 3RD ST",
+            "Quantity": 4,
+            "UnitPrice": 2.12,
+            "TotalPrice": 6.78,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 15,
+            "ItemNumber": "20.20.110",
+            "Description": "PACKING RING 3RD ST",
+            "Quantity": 4,
+            "UnitPrice": 2.50,
+            "TotalPrice": 8.00,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 16,
+            "ItemNumber": "20.20.120",
+            "Description": "PACKING RING",
+            "Quantity": 4,
+            "UnitPrice": 2.73,
+            "TotalPrice": 8.74,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 17,
+            "ItemNumber": "30.20.20",
+            "Description": "GASKET",
+            "Quantity": 8,
+            "UnitPrice": 2.12,
+            "TotalPrice": 13.57,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 18,
+            "ItemNumber": "30.20.60",
+            "Description": "GASKET",
+            "Quantity": 6,
+            "UnitPrice": 3.23,
+            "TotalPrice": 15.50,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 19,
+            "ItemNumber": "40.10.160",
+            "Description": "SAFETY VLV 1STAGE",
+            "Quantity": 2,
+            "UnitPrice": 18.00,
+            "TotalPrice": 28.80,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 20,
+            "ItemNumber": "40.10.200",
+            "Description": "SAFETY VLV 2ND STAGE",
+            "Quantity": 2,
+            "UnitPrice": 25.00,
+            "TotalPrice": 40.00,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 21,
+            "ItemNumber": "40.10.170",
+            "Description": "SAFETY VLV 3RD STAGE",
+            "Quantity": 2,
+            "UnitPrice": 29.00,
+            "TotalPrice": 46.40,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 22,
+            "ItemNumber": "32.50.10",
+            "Description": "AIR SUCTION FILTER ELEMENT",
+            "Quantity": 4,
+            "UnitPrice": 16.90,
+            "TotalPrice": 54.08,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 23,
+            "ItemNumber": "53.20.1-2",
+            "Description": "SOL VLV 1-2ND 220V (CONFIRM COIL 220V)",
+            "Quantity": 8,
+            "UnitPrice": 140.00,
+            "TotalPrice": 896.00,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        },
+        {
+            "Position": 24,
+            "ItemNumber": "53.20.3",
+            "Description": "SOL VLV 3RD (CONFIRM COIL 220V 50-60HZ)",
+            "Quantity": 4,
+            "UnitPrice": 140.00,
+            "TotalPrice": 448.00,
+            "specification": {
+                "Manufacturer": "HATLAPA",
+                "PartType": "AIR COMPRESSOR",
+                "PartTypeNumber": "L 350"
+            },
+            "DeliveryTime": "Stk"
+        }
+    ]
+}
