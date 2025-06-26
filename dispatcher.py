@@ -94,8 +94,7 @@ def dispatch_to_erps_Quote(document_data: Dict[str, Any], erp_targets: List[str]
             if hasattr(erp_class, 'send_quote_to_erp'):
                 erp_result = erp_class.send_quote_to_erp(document_data)
             # Fallback auf die generische Methode
-            else:
-                erp_result = erp_class.send_to_erp(document_data)
+   
             
             results[erp_name] = {"success": True, "result": erp_result}
         except Exception as e:
@@ -121,8 +120,6 @@ def dispatch_to_erps_PurchaseOrder(document_data: Dict[str, Any], erp_targets: L
             if hasattr(erp_class, 'send_purchase_order_to_erp'):
                 erp_result = erp_class.send_purchase_order_to_erp(document_data)
             # Fallback auf die generische Methode
-            else:
-                erp_result = erp_class.send_to_erp(document_data)
             
             results[erp_name] = {"success": True, "result": erp_result}
         except Exception as e:
@@ -147,10 +144,7 @@ def dispatch_to_erps_Requisition(document_data: Dict[str, Any], erp_targets: Lis
             # Spezielle Methode für Requisition, falls vorhanden
             if hasattr(erp_class, 'send_requisition_to_erp'):
                 erp_result = erp_class.send_requisition_to_erp(document_data)
-            # Fallback auf die generische Methode
-            else:
-                erp_result = erp_class.send_to_erp(document_data)
-            
+              
             results[erp_name] = {"success": True, "result": erp_result}
         except Exception as e:
             logging.error(f"Error dispatching Requisition to {erp_name}: {str(e)}")
@@ -174,9 +168,7 @@ def dispatch_to_erps_PurchaseOrderConfirmation(document_data: Dict[str, Any], er
             # Spezielle Methode für PurchaseOrderConfirmation, falls vorhanden
             if hasattr(erp_class, 'send_purchase_order_confirmation_to_erp'):
                 erp_result = erp_class.send_purchase_order_confirmation_to_erp(document_data)
-            # Fallback auf die generische Methode
-            else:
-                erp_result = erp_class.send_to_erp(document_data)
+
             
             results[erp_name] = {"success": True, "result": erp_result}
         except Exception as e:

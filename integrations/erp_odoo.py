@@ -62,6 +62,53 @@ def authenticate_odoo_xml():
 
 class ERPodooIntegration:
     @staticmethod
+    def send_request_for_quote_to_erp(data):
+        """
+        Verarbeitet ein RequestForQuote und sendet es an Odoo.
+        Diese Methode nutzt die bestehende send_to_erp Implementierung.
+        """
+        logging.info("Processing RequestForQuote document for Odoo")
+        # Nutze die vorhandene Implementierung
+        result = ERPodooIntegration.send_to_erp(data)
+        return {"type": "RequestForQuote", "result": result}
+    
+    @staticmethod
+    def send_quote_to_erp(data):
+        """Verarbeitet ein Quote und sendet es an Odoo"""
+        logging.info("Processing Quote document for Odoo")
+        # Nutze auch hier die vorhandene Implementierung mit spezifischen Anpassungen
+        #result = ERPodooIntegration.send_to_erp(data)
+        result = "no process"
+        return {"type": "Quote", "result": result}
+    
+    @staticmethod
+    def send_purchase_order_to_erp(data):
+        """Verarbeitet ein PurchaseOrder und sendet es an Odoo"""
+        logging.info("Processing PurchaseOrder document for Odoo")
+        # Eigene Implementierung für PurchaseOrder könnte hier folgen
+        #result = ERPodooIntegration.send_to_erp(data)
+        result = "no process"
+        return {"type": "PurchaseOrder", "result": result}
+    
+    @staticmethod
+    def send_requisition_to_erp(data):
+        """Verarbeitet ein Requisition und sendet es an Odoo"""
+        logging.info("Processing Requisition document for Odoo")
+        # Eigene Implementierung für Requisition könnte hier folgen
+        #result = ERPodooIntegration.send_to_erp(data)
+        result = "no process"
+        return {"type": "Requisition", "result": result}
+    
+    @staticmethod
+    def send_purchase_order_confirmation_to_erp(data):
+        """Verarbeitet ein PurchaseOrderConfirmation und sendet es an Odoo"""
+        logging.info("Processing PurchaseOrderConfirmation document for Odoo")
+        # Eigene Implementierung für PurchaseOrderConfirmation könnte hier folgen
+        # result = ERPodooIntegration.send_to_erp(data)
+        result = "no process"
+        return {"type": "PurchaseOrderConfirmation", "result": result}
+
+    @staticmethod
     def send_to_erp(data, customer=None):
         """
         Create or update an offer in Odoo.
@@ -397,6 +444,10 @@ class ERPodooIntegration:
                     'sale.order', 'write',
                     [[int(offer_id)], {'note': update_note}]
                 )
+                # models.execute_kw(config["DB"], uid, config["PASS"],
+                #     'sale.order', 'action_confirm',
+                #     [[int(offer_id)]]
+                #     )
                 
                 logging.info(f"Updated {updated_count} items in offer {offer_id}")
             else:

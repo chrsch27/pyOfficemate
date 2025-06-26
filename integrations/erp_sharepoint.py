@@ -142,6 +142,135 @@ def create_list_item(access_token, site_id, list_id, item_data):
     except requests.exceptions.RequestException as e:
         logging.error(f"RequestException creating list item: {e}")
         return None
+    
+def link_documents_in_sharepoint(data, source_document_type, target_document_type, 
+                                source_id_field, target_id_field, filter_field, update_field):
+    """
+    Generic function to link documents in SharePoint by updating fields.
+    
+    Args:
+        data: The document data
+        source_document_type: Type of the source document (e.g., 'Quote', 'PurchaseOrder')
+        target_document_type: Type of the target document to link to (e.g., 'RequestForQuote')
+        source_id_field: Field name in 'data' containing the source document ID (e.g., 'id')
+        target_id_field: Field name in 'data' containing the target document ID to link to (e.g., 'requestForQuoteId')
+        filter_field: Field name in SharePoint to filter by (e.g., 'RFQID')
+        update_field: Field name in SharePoint to update (e.g., 'QuoteID')
+        
+    Returns:
+        Dictionary with result and status information
+    """
+    logging.info(f"Processing {source_document_type} document for SharePoint")
+    
+    # 1. Standard processing using existing send_to_erp function
+    result = "" # Uncomment when needed: ERPsharepointIntegration.send_to_erp(data)
+    
+    # 2. Link documents if possible
+    try:
+        # Extract the necessary IDs from the data
+        target_document_id = data.get(target_id_field)
+        logging.info(f"Target document ID ({target_id_field}): {target_document_id}")
+        source_document_id = data.get(source_id_field)
+        logging.info(f"Source document ID ({source_id_field}): {source_document_id}")   
+        
+        if not target_document_id or not source_document_id:
+            logging.warning(f"Missing {target_id_field} or {source_id_field} in {source_document_type} data. Cannot link documents.")
+            return {"type": source_document_type, "result": result, "linkStatus": "missing_ids"}
+        
+        logging.info(f"Linking {source_document_type} {source_document_id} to {target_document_type} {target_document_id}")
+        
+        # Get Graph API access token
+        access_token = get_graph_access_token()
+        if not access_token:
+            logging.error("Failed to fetch Microsoft Graph access token")
+            return {"type": source_document_type, "result": result, "linkStatus": "token_error"}
+        
+        # Get site and list information
+        hostname = "factorship.sharepoint.com"
+        site_name = "AngeboteundAuftrge"
+        
+        site_id = get_site_id(access_token, hostname, site_name)
+        if not site_id:
+            logging.error("Failed to fetch site ID")
+            return {"type": source_document_type, "result": result, "linkStatus": "site_error"}
+        
+        anfragen_list_id = get_list_id(access_token, site_id, "Anfragen")
+        if not anfragen_list_id:
+            logging.error("Failed to fetch list ID for 'Anfragen'")
+            return {"type": source_document_type, "result": result, "linkStatus": "list_error"}
+        
+        # Search for the target item in the SharePoint list
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Accept": "application/json",
+            "Prefer": "HonorNonIndexedQueriesWarningMayFailRandomly"
+        }
+        
+        filter_url = (
+            f"https://graph.microsoft.com/v1.0/sites/{site_id}/lists/{anfragen_list_id}/items"
+            f"?expand=fields&$filter=fields/{filter_field} eq '{target_document_id}'"
+        )
+        
+        response = requests.get(filter_url, headers=headers)
+        response.raise_for_status()
+        
+        items = response.json().get("value", [])
+        
+        if not items:
+            logging.warning(f"No {target_document_type} found with {filter_field}={target_document_id}")
+            return {"type": source_document_type, "result": result, "linkStatus": f"{target_document_type.lower()}_not_found"}
+        
+        # Get the first matching item
+        target_item = items[0]
+        target_item_id = target_item["id"]
+        
+        # Extract the ERPNr from the found SharePoint item
+        erp_number = target_item.get("fields", {}).get("ERPNr", "UNKNOWN")
+        logging.info(f"Found ERPNr '{erp_number}' for {target_document_type} {target_document_id}")
+        
+        # Update the target item with the source document ID
+        update_url = f"https://graph.microsoft.com/v1.0/sites/{site_id}/lists/{anfragen_list_id}/items/{target_item_id}/fields"
+        
+        # Create update data dictionary with the standard field update
+        update_data = {
+            update_field: source_document_id
+        }
+        
+        # Add ERP number to appropriate fields based on document type
+        if target_document_type == "RequestForQuote":
+            update_data["ERPNummer"] = erp_number
+            logging.info(f"Adding ERPNr '{erp_number}' to field 'ERPNummer' for RequestForQuote")
+        elif target_document_type == "PurchaseOrder":
+            update_data["ERPOrderNummer"] = erp_number
+            logging.info(f"Adding ERPNr '{erp_number}' to field 'ERPOrderNummer' for PurchaseOrder")
+        
+        update_headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json"
+        }
+        
+        # Log the update data for troubleshooting
+        logging.info(f"Updating SharePoint item {target_item_id} with data: {json.dumps(update_data)}")
+        
+        update_response = requests.patch(update_url, headers=update_headers, json=update_data)
+        update_response.raise_for_status()
+        
+        logging.info(f"Successfully linked {source_document_type} {source_document_id} to {target_document_type} {target_document_id}")
+        return {
+            "type": source_document_type, 
+            "result": result, 
+            "linkStatus": "success",
+            "targetItemId": target_item_id,
+            "ERPNummer": erp_number
+        }
+        
+    except requests.exceptions.HTTPError as http_err:
+        logging.error(f"HTTP error linking {source_document_type} to {target_document_type}: {http_err}, " 
+                        f"Response: {http_err.response.text if hasattr(http_err, 'response') else 'No response'}")
+        return {"type": source_document_type, "result": result, "linkStatus": "http_error", "error": str(http_err)}
+    except Exception as e:
+        logging.error(f"Error linking {source_document_type} to {target_document_type}: {str(e)}")
+        return {"type": source_document_type, "result": result, "linkStatus": "error", "error": str(e)}
 
 class ERPsharepointIntegration:
     @staticmethod
@@ -221,6 +350,7 @@ class ERPsharepointIntegration:
                 "Artikeltext": item["description"],  # Beschreibung des Artikels
                 "Menge": item["quantity"],  # Menge
                 "UnitPrice": item["unitPrice"],  # Einzelpreis
+                "Discount": item.get("discountCost", 0),  # Rabatt
                 "Langtext": langtext,  # Langtext
                 "AnfrageID": int(header_item_id)
             }
@@ -229,27 +359,150 @@ class ERPsharepointIntegration:
 
         return {"status": "success", "message": "Data sent to SharePoint successfully."}
 
+
+    # Existing send_to_erp method is preserved exactly as is
+    
+    @staticmethod
+    def send_request_for_quote_to_erp(data):
+        """
+        Verarbeitet ein RequestForQuote und speichert es in SharePoint.
+        Verwendet die bestehende send_to_erp Implementierung.
+        """
+        logging.info("Processing RequestForQuote document for SharePoint")
+        result = ERPsharepointIntegration.send_to_erp(data)
+        return {"type": "RequestForQuote", "result": result}
+    
+    @staticmethod
+    def send_quote_to_erp(data):
+        """
+        Verarbeitet ein Quote und speichert es in SharePoint.
+        Sucht auch nach dem zugehörigen RequestForQuote und verlinkt diesen.
+        """
+        return link_documents_in_sharepoint(
+            data=data,
+            source_document_type="Quote",
+            target_document_type="RequestForQuote",
+            source_id_field="id",
+            target_id_field="requestForQuoteId",
+            filter_field="RFQID",
+            update_field="QuoteID"
+        )
+
+    @staticmethod
+    def send_purchase_order_to_erp(data):
+        """
+        Verarbeitet ein PurchaseOrder und speichert es in SharePoint.
+        Sucht auch nach dem zugehörigen Quote und verlinkt diesen.
+
+        """
+        ERPNumber = data.get("ERPNummer", "NNNNNNN")
+        return link_documents_in_sharepoint(
+            data=data,
+            source_document_type="PurchaseOrder",
+            target_document_type="RequestForQuote",
+            source_id_field="id",
+            target_id_field="requestForQuoteId",
+            filter_field="RFQID",
+            update_field="POID"
+
+        )
+
+    @staticmethod
+    def send_purchase_order_confirmation_to_erp(data):
+        """
+        Verarbeitet ein PurchaseOrderConfirmation und speichert es in SharePoint.
+        Sucht auch nach dem zugehörigen PurchaseOrder und verlinkt diesen.
+        """
+        return link_documents_in_sharepoint(
+            data=data,
+            source_document_type="PurchaseOrderConfirmation",
+            target_document_type="PurchaseOrder",
+            source_id_field="id",
+            target_id_field="purchaseOrderId",
+            filter_field="POID",
+            update_field="POConfirmationID"
+        )
+    
+    # Fetch methods
+    
+    @staticmethod
+    def fetch_request_for_quote(document_id):
+        """
+        Holt ein RequestForQuote-Dokument aus SharePoint basierend auf der ERPNr.
+        """
+        logging.info(f"Fetching RequestForQuote document {document_id} from SharePoint")
+        portal_data = ERPsharepointIntegration.fetch_portal_data_by_erp_number(document_id)
+        if portal_data:
+            return {"id": document_id, "type": "RequestForQuote", "data": portal_data}
+        return {"id": document_id, "type": "RequestForQuote", "error": "Document not found"}
+    
+    @staticmethod
+    def fetch_quote(document_id):
+        """
+        Holt ein Quote-Dokument aus SharePoint basierend auf der ERPNr.
+        """
+        logging.info(f"Fetching Quote document {document_id} from SharePoint")
+        portal_data = ERPsharepointIntegration.fetch_portal_data_by_erp_number(document_id)
+        if portal_data:
+            return {"id": document_id, "type": "Quote", "data": portal_data}
+        return {"id": document_id, "type": "Quote", "error": "Document not found"}
+    
+    @staticmethod
+    def fetch_purchase_order(document_id):
+        """
+        Holt ein PurchaseOrder-Dokument aus SharePoint basierend auf der ERPNr.
+        """
+        logging.info(f"Fetching PurchaseOrder document {document_id} from SharePoint")
+        portal_data = ERPsharepointIntegration.fetch_portal_data_by_erp_number(document_id)
+        if portal_data:
+            return {"id": document_id, "type": "PurchaseOrder", "data": portal_data}
+        return {"id": document_id, "type": "PurchaseOrder", "error": "Document not found"}
+    
+    @staticmethod
+    def fetch_requisition(document_id):
+        """
+        Holt ein Requisition-Dokument aus SharePoint basierend auf der ERPNr.
+        """
+        logging.info(f"Fetching Requisition document {document_id} from SharePoint")
+        portal_data = ERPsharepointIntegration.fetch_portal_data_by_erp_number(document_id)
+        if portal_data:
+            return {"id": document_id, "type": "Requisition", "data": portal_data}
+        return {"id": document_id, "type": "Requisition", "error": "Document not found"}
+    
+    @staticmethod
+    def fetch_purchase_order_confirmation(document_id):
+        """
+        Holt ein PurchaseOrderConfirmation-Dokument aus SharePoint basierend auf der ERPNr.
+        """
+        logging.info(f"Fetching PurchaseOrderConfirmation document {document_id} from SharePoint")
+        portal_data = ERPsharepointIntegration.fetch_portal_data_by_erp_number(document_id)
+        if portal_data:
+            return {"id": document_id, "type": "PurchaseOrderConfirmation", "data": portal_data}
+        return {"id": document_id, "type": "PurchaseOrderConfirmation", "error": "Document not found"}
+    
     @staticmethod
     def fetch_document(document_id, document_type):
         """
-        Fetch a document from the PDS ERP system.
-        :param document_id: The unique document ID.
-        :param document_type: The type of the document.
-        :return: The document data.
+        Generische Methode zum Abrufen von Dokumenten aus SharePoint.
+        Leitet an die spezifischen Fetch-Methoden weiter.
         """
-        logging.info(f"Fetching document {document_id} of type {document_type} from ERP PDS...")
-        api_url = f"https://erp-pds.example.com/api/{document_type}/{document_id}"
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {os.getenv('ERP_PDS_TOKEN')}"
-        }
-        try:
-            response = requests.get(api_url, headers=headers)
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            logging.error(f"Error fetching document from ERP PDS: {e}")
-            return None
+        logging.info(f"Fetching generic document {document_id} of type {document_type} from SharePoint")
+        
+        # Delegate to the appropriate type-specific method
+        if document_type == "RequestForQuote":
+            return ERPsharepointIntegration.fetch_request_for_quote(document_id)
+        elif document_type == "Quote":
+            return ERPsharepointIntegration.fetch_quote(document_id)
+        elif document_type == "PurchaseOrder":
+            return ERPsharepointIntegration.fetch_purchase_order(document_id)
+        elif document_type == "Requisition":
+            return ERPsharepointIntegration.fetch_requisition(document_id)
+        elif document_type == "PurchaseOrderConfirmation":
+            return ERPsharepointIntegration.fetch_purchase_order_confirmation(document_id)
+        else:
+            # Unknown document type
+            logging.warning(f"Unknown document type: {document_type}")
+            return {"id": document_id, "type": "Unknown", "error": f"Unsupported document type: {document_type}"}
 
     @staticmethod
     def fetch_portal_data_by_erp_number(document_id):
@@ -308,3 +561,4 @@ class ERPsharepointIntegration:
         except requests.exceptions.RequestException as e:
             logging.error(f"Error while querying SharePoint: {e}")
             return None
+

@@ -73,12 +73,14 @@ class ShipServPortal(BasePortal):
         """
         doc_type = filters.get('doc_type')
         submittedDate = filters.get('submittedDate')
-        if not doc_type:
-            logging.error("Document type (doc_type) is required for fetching ShipServ documents")
-            return []
-        urlParam="?type=" + doc_type
+        urlParam = ""
+        if doc_type:
+            urlParam="?type=" + doc_type
         if submittedDate:
-            urlParam=urlParam + "&submittedDate=" + submittedDate
+            if urlParam == "":
+                urlParam = "?submittedDate=" + submittedDate
+            else:
+                urlParam=urlParam + "&submittedDate=" + submittedDate
 
         token = self._token or self._get_token()
         if not token:
