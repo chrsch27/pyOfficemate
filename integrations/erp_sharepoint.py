@@ -241,7 +241,10 @@ def link_documents_in_sharepoint(data, source_document_type, target_document_typ
             update_data["ERPNummer"] = erp_number
             logging.info(f"Adding ERPNr '{erp_number}' to field 'ERPNummer' for RequestForQuote")
         elif target_document_type == "PurchaseOrder":
+            update_data["requestedDeliveryDate"] = data.get("requestedDeliveryDate", "")
             update_data["ERPOrderNummer"] = erp_number
+            update_data["PortalDataJsonOrder"] = json.dumps(data)
+            update_data["POID"] = source_document_id
             logging.info(f"Adding ERPNr '{erp_number}' to field 'ERPOrderNummer' for PurchaseOrder")
         
         update_headers = {
@@ -317,7 +320,7 @@ class ERPsharepointIntegration:
             "vesselID": data["vessel"]["imoNumber"],  # ID des Schiffs
             "RFQID": data["id"],  # RFQ-ID
             "currency": data["currency"]["code"],  # Währung
-            #"requestedDeliveryDate": data["requestedDeliveryDate"],  # Angefragtes Lieferdatum
+            "requestedDeliveryDate": data["requestedDeliveryDate"],  # Großschreibung am Anfang
             "subject": data["subject"],  # Betreff
             #"termsAndConditions": data["termsAndConditions"],  # Bedingungen
             #"buyerContact": data["buyerContact"],  # Kontakt des Käufers
@@ -398,8 +401,8 @@ class ERPsharepointIntegration:
         ERPNumber = data.get("ERPNummer", "NNNNNNN")
         return link_documents_in_sharepoint(
             data=data,
-            source_document_type="PurchaseOrder",
-            target_document_type="RequestForQuote",
+            source_document_type="RequestForQuote",
+            target_document_type="PurchaseOrder",
             source_id_field="id",
             target_id_field="requestForQuoteId",
             filter_field="RFQID",
@@ -505,11 +508,17 @@ class ERPsharepointIntegration:
             return {"id": document_id, "type": "Unknown", "error": f"Unsupported document type: {document_type}"}
 
     @staticmethod
-    def fetch_portal_data_by_erp_number(document_id):
+    def fetch_portal_data_by_erp_number(document_id,documentType):
         """
         Sucht in der SharePoint-Liste 'Anfragen' den Eintrag mit ERPNr = document_id
         und gibt das Feld 'PortalDataJson' zurück (als dict).
         """
+        if documentType == "RequestForQuote":
+            lookForERPnr = "ERPNr"
+            portalDataSource="PortalDataJson"
+        elif documentType == "PurchaseOrder":
+            lookForERPnr = "ERPOrderNummer"
+            portalDataSource="PortalDataJsonOrder"
         access_token = get_graph_access_token()
         if not access_token:
             logging.error("Failed to fetch Microsoft Graph access token.")
@@ -530,7 +539,7 @@ class ERPsharepointIntegration:
         # Suche Einträge in der Liste, bei denen fields/ERPNr = 'document_id'
         query_url = (
             f"https://graph.microsoft.com/v1.0/sites/{site_id}/lists/{anfragen_list_id}/items"
-            f"?expand=fields&$filter=fields/ERPNr eq '{document_id}'"
+            f"?expand=fields&$filter=fields/{lookForERPnr} eq '{document_id}'"
         )
         logging.info(f"Query URL: {query_url}")
         headers = {"Authorization": f"Bearer {access_token}"}
@@ -546,7 +555,7 @@ class ERPsharepointIntegration:
 
             # Nimm z.B. das erste gefundene Element
             fields = items[0].get("fields", {})
-            portal_data_json = fields.get("PortalDataJson")
+            portal_data_json = fields.get(portalDataSource, None)
             if not portal_data_json:
                 logging.info(f"No 'PortalDataJson' found for item with ERPNr={document_id}")
                 return None

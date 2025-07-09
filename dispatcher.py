@@ -205,3 +205,30 @@ def fetch_data_from_erp(erp_name: str, document_id: str, document_type: str) -> 
     except Exception as e:
         logging.error(f"Error fetching {document_type} from {erp_name}: {str(e)}")
         return None
+
+def dispatch_document(document_data, erp_targets):
+    """
+    Routes a document to the appropriate dispatch method based on its type.
+    
+    Args:
+        document_data: The document data with a 'type' field
+        erp_targets: List of ERP systems to dispatch to
+        
+    Returns:
+        Results from dispatching to the targeted ERP systems
+    """
+    doc_type = document_data.get('type')
+    
+    if doc_type == "RequestForQuote":
+        return dispatch_to_erps(document_data, erp_targets)
+    elif doc_type == "PurchaseOrderConfirmation":
+        return dispatch_to_erps_PurchaseOrderConfirmation(document_data, erp_targets)
+    elif doc_type == "Requisition":
+        return dispatch_to_erps_Requisition(document_data, erp_targets)
+    elif doc_type == "Quote":
+        return dispatch_to_erps_Quote(document_data, erp_targets)
+    elif doc_type == "PurchaseOrder":
+        return dispatch_to_erps_PurchaseOrder(document_data, erp_targets)
+    else:
+        logging.warning(f"Unknown document type: {doc_type}. No dispatching performed.")
+        return {"status": "error", "message": f"Unknown document type: {doc_type}"}

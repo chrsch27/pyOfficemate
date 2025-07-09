@@ -1,5 +1,6 @@
 {
-    "type": "Quote",
+    "id": "025debdc-16be-457e-9afc-dea850fb3132",
+    "type": "RequestForQuote",
     "buyer": {
         "tnId": 11609,
         "name": "Faye Demo - UAT"
@@ -8,21 +9,24 @@
         "tnId": 238322,
         "name": "Hamburg Factorship GmbH"
     },
-    "subject": "EMERGENCY AIR COMPRESSOR",
-    "comment": "",
-    "referenceNumber": "58600580/1",
-    "requestForQuoteId": "a6eb66af-9df5-42fa-b7b6-b384d16eb018",
+    "subject": "",
+    "comment": "[Port: TBA]",
+    "referenceNumber": "11500250",
+    "requisitionId": null,
+    "requestForQuoteId": null,
+    "quoteId": null,
+    "purchaseOrderId": null,
     "priority": "Low",
     "offeredQuality": "Genuine",
     "taxStatus": "Exempt",
     "paymentTerms": "",
-    "termsAndConditions": "<head>\n <style>\n body {\n margin-left: 20px;\n margin-right: 40px;\n }\n}\n </style>\n</head>\n<body>\n<b><u>ACCOUNTING AND FISCAL INFORMATION</b></u>\n\n<b>1) <u>How to address the invoice:</u></b>\n\nCosta Crociere S.p.a\nPiazza Piccapietra 48 - 16121 GENOVA (ITALY)\nC.F. e P. IVA: IT 02545900108 \nTel.: +39 010 54831\n\n<u>It won’t be possible to process the invoice if not addressed as per above.\n\nPLEASE ALWAYS REFERENCE OUR P.O. NUMBER ON YOUR INVOICES.</u>\n\nPlease note that the supply is not subject to VAT pursuant to the article of the local VAT law applicable for supplies to ocean going ships invoiced to the shipowner. (pls see the VAT exemption declaration attached)\n\nView and download <a href=https://legacy.shipserv.com/ShipServ/progs/CMG/VAT_Exemption_letter_2025.pdf>VAT EXEMPTION LETTER 2025</a>\nView and download <a href=https://legacy.shipserv.com/ShipServ/progs/CMG/ACCOUNTING_AND_FISCAL_INFORMATION.pdf>ACCOUNTING AND FISCAL INFORMATION</a>\n\n<b><u>INSTRUCTIONS OF DELIVERY</u></b>\n\nAll deliveries to our warehouses or alongside the ship must follow the delivery instructions below: \n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Please confirm the delivery date within 3 working days after receipt of the purchase order by confirming it via your ShipServ Trade account on shipserv.com\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In accordance with weights and dimensions, all deliveries must be packed properly for safe handling, storage, and transport.\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;All deliveries must be palletized, except for small deliveries/parcel deliveries: \n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All packages shall be placed on Euro pallets.\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Max. pallet height and weight: 1,80m and 1000 kg \n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;For non-standard size parts, please contact our warehouse in advance to book a time slot and any specific delivery instructions.\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Please identify package/s (readable from outside), with Name of Ship and PO Number. All delivery documents can be easily removed from the outside. \n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Any invoice must point out the presence of customs documents (EXA; T1; T2; E-AD), highlighting the number of the customs document.\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All deliveries must be separated by Ship. \n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All delivery notes must contain single and total net/gross weights of the goods and the corresponding customs codes and country of origin. \n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If the delivery of a single PO is composed of several packages, each one of those must be marked with 1/3, 2/3 etc. and the total number of packages must be mentioned in the delivery note.\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Whenever required for marine equipment as per EU Regulation 2017/306, please provide us with the MED (Marine Equipment Directive) Certificate. \n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;In the event of delivery of any controlled temperature goods, the related temperature requirement must be highlighted on the invoice and packing list. \n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.&nbsp;&nbsp;&nbsp;ADR&nbsp; /&nbsp; IMO information – if you are sending dangerous products, the goods need to arrive in a proper packaging, matching the rules of ADR&nbsp; /&nbsp; IMO /&nbsp; IATA (depending how the goods shall be further transported). Packages containing &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dangerous goods must be clearly labeled as such from the outside in accordance with the statutory regulations (ADR&nbsp; /&nbsp; IMO /&nbsp; IATA). UN number, class, weight, and quantity of dangerous goods must be specified on the delivery note. The &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;goods must always be accompanied by the relevant MSDS. The MSDS must have the 16-sections format and must be in ENGLISH language.\n\nFOR DELIVERIES TO AIDA WAREHOUSE – BASTE & LANGE GMBH\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;11.&nbsp;&nbsp;&nbsp;Each delivery must be accompanied by a delivery note and packing list.\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pre-alert must be sent to deliverynotes.aida@bastelange.com. \n\nFOR DELIVERIES TO COSTA WAREHOUSE – SEDISP SRL / ASBORNO SRL\t\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12.&nbsp;&nbsp;&nbsp;Each delivery must be accompanied by three (3) copies of the invoice. One (1) copy inside and two (2) copies outside.\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13.&nbsp;&nbsp;&nbsp;The invoice must state if it must be registered in the portal INTRASTAT CESSION (intracommunity cession register).\n\nFOR DELIVERIES ALONGSIDE SHIP\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;14.&nbsp;&nbsp;&nbsp;The Port Agent involved must be informed and will give specific instructions about physical delivery and customs procedures.\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Please contact the technical purchaser. \n \nFor further details, please contact the technical purchaser to obtain our Logistic General Terms of Delivery (P3.02.02 IO02). \n\nView and download <a href=https://legacy.shipserv.com/ShipServ/progs/CMG/General_Terms_and_Conditions_Costa_Version_April_2025.pdf>General Terms and Conditions Costa Version April 2025</a>\nView and download <a href=https://legacy.shipserv.com/ShipServ/progs/CMG/Carnival_Corporation_plc_Business_Partner_Anticorruption_Policy.pdf>Business Partner Anticorruption Policy</a>",
+    "termsAndConditions": "Time of delivery: \n Terms of delivery: ex works \n Validity: 2 months after offer",
     "transportMode": "",
     "vessel": {
         "name": "Hoverfly",
         "imoNumber": "4403355",
-        "estimatedTimeArrival": "2025-06-23T11:34:22.488706Z",
-        "estimatedTimeDeparture": "2025-06-23T11:34:22.488714Z"
+        "estimatedTimeArrival": "2025-06-25T21:27:47.521134Z",
+        "estimatedTimeDeparture": "2025-06-25T21:27:47.521142Z"
     },
     "deliveryPort": {
         "code": null,
@@ -35,15 +39,15 @@
     },
     "packagingInstructions": null,
     "billing": {
-        "name": null,
+        "name": "Faye Demo - UAT",
         "identification": null,
         "address": {
-            "streetAddress1": null,
+            "streetAddress1": "100, Grainger Parkway",
             "streetAddress2": null,
-            "city": null,
-            "zipCode": null,
-            "state": null,
-            "countryCode": null
+            "city": "Lake Forest",
+            "zipCode": "60045",
+            "state": "Illinois",
+            "countryCode": "US"
         },
         "contact": {
             "jobTitle": null,
@@ -96,33 +100,234 @@
         {
             "number": 1,
             "partCode": "",
-            "description": "1 [PC] CONNECTING ROD BEARING | Manufacturer: 050 520 | Equipment: Air Compressor | Manufacturer: J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP22L | Comment: Buyer Part : 7314805015586, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
-            "unitOfMeasure": "PCE",
-            "quantity": 2.0,
-            "unitPrice": 23.4,
+            "description": "1 Maintenance kit for solenoid valve 037680 | Manufacturer: 038528 | Equipment: Air Compressor | Manufacturer: *J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP 460L | Comment: Buyer Part : 7314801001103, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
+            "unitOfMeasure": "SET",
+            "quantity": 20.0,
+            "unitPrice": 20.0,
+            "discountPercentage": 0.0,
             "discountCost": 0.0,
-            "totalCost": 46.8
+            "totalCost": 400.0
         },
         {
             "number": 2,
             "partCode": "",
-            "description": "2 [PC] AIR FILTER | Manufacturer: 030 113 | Comment: Buyer Part : 7314805015586, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
+            "description": "2 [PC] Air Filter | Manufacturer: 042308 | Equipment: Air Compressor | Manufacturer: *J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP 460L | Comment: Buyer Part : 7314801001104, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
             "unitOfMeasure": "PCE",
-            "quantity": 2.0,
-            "unitPrice": 115.0,
+            "quantity": 20.0,
+            "unitPrice": 12.5,
+            "discountPercentage": 0.0,
             "discountCost": 0.0,
-            "totalCost": 230.0
+            "totalCost": 250.0
+        },
+        {
+            "number": 3,
+            "partCode": "",
+            "description": "4 [PC] Oil pressure sensor | Manufacturer: 041654 | Equipment: Air Compressor | Manufacturer: *J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP 460L | Comment: Buyer Part : 7314801001770, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
+            "unitOfMeasure": "PCE",
+            "quantity": 20.0,
+            "unitPrice": 3.65,
+            "discountPercentage": 0.0,
+            "discountCost": 0.0,
+            "totalCost": 73.0
+        },
+        {
+            "number": 4,
+            "partCode": "",
+            "description": "5 [PC] SOLENOID DRAIN VALVE | Manufacturer: Item No. 42, 4.2 Compressor Unit WP460L(2/2) | Equipment: Air Compressor | Manufacturer: *J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP 460L | Comment: 4.2 Compressor Unit WP460L(2/2, Buyer Part : 7314801001771, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
+            "unitOfMeasure": "PCE",
+            "quantity": 10.0,
+            "unitPrice": 122.0,
+            "discountPercentage": 0.0,
+            "discountCost": 0.0,
+            "totalCost": 1220.0
+        },
+        {
+            "number": 5,
+            "partCode": "",
+            "description": "7 [PC] FINAL PRESSURE SAFTEY VALVE | Manufacturer: Item No. 41, 4.1 Compressor Unit WP460L(1/2) | Equipment: Air Compressor | Manufacturer: *J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP 460L | Comment: Buyer Part : 7314801002771, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
+            "unitOfMeasure": "PCE",
+            "quantity": 30.0,
+            "unitPrice": 45.0,
+            "discountPercentage": 0.0,
+            "discountCost": 0.0,
+            "totalCost": 1350.0
+        },
+        {
+            "number": 6,
+            "partCode": "",
+            "description": "8 [PC] Safety valve compression stage 1 | Manufacturer: 032939 | Equipment: Air Compressor | Manufacturer: *J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP 460L | Comment: Buyer Part : 7314801005770, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
+            "unitOfMeasure": "PCE",
+            "quantity": 30.0,
+            "unitPrice": 77.0,
+            "discountPercentage": 0.0,
+            "discountCost": 0.0,
+            "totalCost": 2310.0
+        },
+        {
+            "number": 7,
+            "partCode": "",
+            "description": "9 Oil pump assembly | Manufacturer: Fig. 4.21 | Equipment: Air Compressor | Manufacturer: *J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP 460L | Comment: Buyer Part : 7314801001122, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
+            "unitOfMeasure": "SET",
+            "quantity": 10.0,
+            "unitPrice": 76.0,
+            "discountPercentage": 0.0,
+            "discountCost": 0.0,
+            "totalCost": 760.0
+        },
+        {
+            "number": 8,
+            "partCode": "",
+            "description": "10 [PC] Safety valve compression stage 2 | Manufacturer: 036423 | Equipment: Air Compressor | Manufacturer: *J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP 460L | Comment: Buyer Part : 7314801006770, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
+            "unitOfMeasure": "PCE",
+            "quantity": 30.0,
+            "unitPrice": 45.0,
+            "discountPercentage": 0.0,
+            "discountCost": 0.0,
+            "totalCost": 1350.0
+        },
+        {
+            "number": 9,
+            "partCode": "",
+            "description": "11 [PC] OIL PUMP GEAR WHEEL | Manufacturer: Item No. 3, 4.21 Oil Pump assembly | Equipment: Air Compressor | Manufacturer: *J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP 460L | Comment: 4.21 Oil Pump assembly, Buyer Part : 7314801006771, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
+            "unitOfMeasure": "PCE",
+            "quantity": 20.0,
+            "unitPrice": 12.5,
+            "discountPercentage": 0.0,
+            "discountCost": 0.0,
+            "totalCost": 250.0
+        },
+        {
+            "number": 10,
+            "partCode": "",
+            "description": "12 [PC] Valve compression stage 1 | Manufacturer: 041633 | Equipment: Air Compressor | Manufacturer: *J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP 460L | Comment: Buyer Part : 7314801047770, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
+            "unitOfMeasure": "PCE",
+            "quantity": 10.0,
+            "unitPrice": 109.0,
+            "discountPercentage": 0.0,
+            "discountCost": 0.0,
+            "totalCost": 1090.0
+        },
+        {
+            "number": 11,
+            "partCode": "",
+            "description": "13 [PC] Cylinder head gasket | Manufacturer: 092393 | Equipment: Air Compressor | Manufacturer: *J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP 460L | Comment: Buyer Part : 7314801048770, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
+            "unitOfMeasure": "PCE",
+            "quantity": 60.0,
+            "unitPrice": 44.0,
+            "discountPercentage": 0.0,
+            "discountCost": 0.0,
+            "totalCost": 2640.0
+        },
+        {
+            "number": 12,
+            "partCode": "",
+            "description": "14 [PC] Low tolerance o-ring | Manufacturer: 092797 | Equipment: Air Compressor | Manufacturer: *J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP 460L | Comment: Buyer Part : 7314801049770, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
+            "unitOfMeasure": "PCE",
+            "quantity": 60.0,
+            "unitPrice": 340.0,
+            "discountPercentage": 20.0,
+            "discountCost": 4080.0,
+            "totalCost": 16320.0
+        },
+        {
+            "number": 13,
+            "partCode": "",
+            "description": "15 [PC] Valve compression stage 2 | Manufacturer: 041649 | Equipment: Air Compressor | Manufacturer: *J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP 460L | Comment: Buyer Part : 7314801051770, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
+            "unitOfMeasure": "PCE",
+            "quantity": 20.0,
+            "unitPrice": 1.22,
+            "discountPercentage": 0.0,
+            "discountCost": 0.0,
+            "totalCost": 24.4
+        },
+        {
+            "number": 14,
+            "partCode": "",
+            "description": "16 [PC] Gasket | Manufacturer: 092394 | Equipment: Air Compressor | Manufacturer: *J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP 460L | Comment: Buyer Part : 7314801052770, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
+            "unitOfMeasure": "PCE",
+            "quantity": 60.0,
+            "unitPrice": 25.0,
+            "discountPercentage": 0.0,
+            "discountCost": 0.0,
+            "totalCost": 1500.0
+        },
+        {
+            "number": 15,
+            "partCode": "",
+            "description": "17 [PC] Ring gasket | Manufacturer: 092798 | Equipment: Air Compressor | Manufacturer: *J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP 460L | Comment: Buyer Part : 7314801053770, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
+            "unitOfMeasure": "PCE",
+            "quantity": 60.0,
+            "unitPrice": 77.0,
+            "discountPercentage": 0.0,
+            "discountCost": 0.0,
+            "totalCost": 4620.0
+        },
+        {
+            "number": 16,
+            "partCode": "",
+            "description": "18 [PC] Ring gasket | Manufacturer: 093037 | Equipment: Air Compressor | Manufacturer: *J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP 460L | Comment: Buyer Part : 7314801054770, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
+            "unitOfMeasure": "PCE",
+            "quantity": 60.0,
+            "unitPrice": 12.67,
+            "discountPercentage": 0.0,
+            "discountCost": 0.0,
+            "totalCost": 760.2
+        },
+        {
+            "number": 17,
+            "partCode": "",
+            "description": "19 [PC] Valve compression stage 3 | Manufacturer: 041629 | Equipment: Air Compressor | Manufacturer: *J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP 460L | Comment: Buyer Part : 7314801056770, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
+            "unitOfMeasure": "PCE",
+            "quantity": 30.0,
+            "unitPrice": 4.56,
+            "discountPercentage": 0.0,
+            "discountCost": 0.0,
+            "totalCost": 136.79999999999998
+        },
+        {
+            "number": 18,
+            "partCode": "",
+            "description": "20 [PC] Ring gasket | Manufacturer: 092798 | Equipment: Air Compressor | Manufacturer: *J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP 460L | Comment: Buyer Part : 7314801053770, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
+            "unitOfMeasure": "PCE",
+            "quantity": 60.0,
+            "unitPrice": 34.5,
+            "discountPercentage": 0.0,
+            "discountCost": 0.0,
+            "totalCost": 2070.0
+        },
+        {
+            "number": 19,
+            "partCode": "",
+            "description": "21 [PC] High pressure hose | Manufacturer: 044893 | Equipment: Air Compressor | Manufacturer: *J.P. Sauer & Sohn Maschinenbau GmbH | Model: WP 460L | Comment: Buyer Part : 7314801065770, Maker : *J.P. Sauer & Sohn Maschinenbau GmbH",
+            "unitOfMeasure": "PCE",
+            "quantity": 30.0,
+            "unitPrice": 33.0,
+            "discountPercentage": 0.0,
+            "discountCost": 0.0,
+            "totalCost": 990.0
+        },
+        {
+            "number": 20,
+            "partCode": "",
+            "description": "900 Packing and Handling | Buyer: 786.62.02.000.047",
+            "unitOfMeasure": "SET",
+            "quantity": 10.0,
+            "unitPrice": 55.0,
+            "discountPercentage": 0.0,
+            "discountCost": 0.0,
+            "totalCost": 550.0
         }
     ],
     "currency": {
-        "code": "USD"
+        "code": "EUR"
     },
     "exported": true,
     "exportedDate": null,
-    "createdDate": "2025-06-23T13:31:10.695784Z",
-    "submittedDate": "2025-06-23T13:31:10",
-    "discountCost": 0.0,
-    "subCost": 276.8,
-    "cost": 276.8,
+    "createdDate": "2025-06-27T08:26:31.562622Z",
+    "submittedDate": "2025-06-27T08:26:31",
+    "ERPNummer": "251350",
+    "discountCost": 5799.66,
+    "subCost": 38664.4,
+    "cost": 32864.740000000005,
     "quoteExpiryDate": "2025-12-31T23:59:59"
 }

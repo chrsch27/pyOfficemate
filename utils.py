@@ -149,6 +149,7 @@ def transform_response(response):
         "exported": get_nested(response, "exported", default=None),
         "exportedDate": get_nested(response, "exportedDate", default=None),
         "createdDate": get_nested(response, "createdDate", default=None),
-        "submittedDate": get_nested(response, "submittedDate", default=None)
+        "submittedDate": get_nested(response, "submittedDate", default=None),
+        "attachments": get_nested(response, "attachments", default=None)
     }
     return transformed

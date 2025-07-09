@@ -1,64 +1,137 @@
 {
-    "documents": [
-        {
-            "id": "d7d20ca9-62b1-441b-9966-5010e412f9b0",
-            "type": "RequestForQuote",
-            "transactionId": "19c13972-360e-4917-bf6f-4081bf6e9371",
-            "buyerTnId": 11609,
-            "buyerName": "Faye Demo - UAT",
-            "supplierTnId": 238322,
-            "supplierName": "Hamburg Factorship GmbH",
-            "priority": "Medium",
-            "currencyCode": "EUR",
-            "subject": "MAIN AIR COMPRESSOR",
-            "totalCost": 0.0,
-            "referenceNumber": "58600579",
-            "status": "Unactioned",
-            "createdDate": "2025-05-09T00:33:18.000Z",
-            "submittedDate": "2025-05-09T00:33:18.000Z",
-            "exported": false,
-            "vesselIMO": "9467445",
-            "vesselName": "MSC Katrina"
-        },
-        {
-            "id": "8bd6984f-137a-4c19-b430-a72f369ad2e3",
-            "type": "RequestForQuote",
-            "transactionId": "20bee4cd-955f-46dd-bac1-be299d00f300",
-            "buyerTnId": 11609,
-            "buyerName": "Faye Demo - UAT",
-            "supplierTnId": 238322,
-            "supplierName": "Hamburg Factorship GmbH",
-            "priority": "Medium",
-            "currencyCode": "EUR",
-            "subject": "EMERGENCY AIR COMPRESSOR",
-            "totalCost": 0.0,
-            "referenceNumber": "58600580",
-            "status": "Unactioned",
-            "createdDate": "2025-05-09T00:33:20.000Z",
-            "submittedDate": "2025-05-09T00:33:20.000Z",
-            "exported": false,
-            "vesselIMO": "9467445",
-            "vesselName": "MSC Katrina"
-        },
-        {
-            "id": "c3a689b8-e67a-49f5-88c4-99267cda4e1c",
-            "type": "RequestForQuote",
-            "transactionId": "cfea87fb-0668-4a71-b524-c546398fbd00",
-            "buyerTnId": 11609,
-            "buyerName": "Faye Demo - UAT",
-            "supplierTnId": 238322,
-            "supplierName": "Hamburg Factorship GmbH",
-            "priority": "Low",
-            "currencyCode": "EUR",
-            "subject": "Mooring Winch Electromotor",
-            "totalCost": 0.0,
-            "referenceNumber": "VEM-0078-2025-D",
-            "status": "Unactioned",
-            "createdDate": "2025-05-09T00:33:22.000Z",
-            "submittedDate": "2025-05-09T00:33:22.000Z",
-            "exported": false,
-            "vesselIMO": "9514987",
-            "vesselName": "Viking Emerald"
+    "id": "b14625d3-d712-4ae3-8bda-57cee01e0097",
+    "type": "PurchaseOrder",
+    "buyer": {
+        "tnId": 11609,
+        "name": "Faye Demo - UAT"
+    },
+    "supplier": {
+        "tnId": 238322,
+        "name": "Hamburg Factorship GmbH"
+    },
+    "subject": "EMERGENCY AIR COMPRESSOR",
+    "referenceNumber": "26204153",
+    "requestForQuoteId": "7d4ed19f-d5c7-496a-a76a-ca3f37bf9c5d",
+    "quoteId": "c97b31af-8a8a-4e06-a1ba-b9f058106d44",
+    "quoteReferenceNumber": "26204153",
+    "priority": "Medium",
+    "taxStatus": "Exempt",
+    "paymentTerms": "",
+    "termsAndConditions": "Time of delivery: \n Terms of delivery: ex works \n Validity: 2 months after offer",
+    "transportMode": "",
+    "vessel": {
+        "name": "Hoverfly",
+        "imoNumber": "4403355",
+        "estimatedTimeArrival": "2025-06-26T05:28:00.000Z",
+        "estimatedTimeDeparture": "2025-06-26T05:28:00.000Z"
+    },
+    "deliveryPort": {
+        "code": "DE-ABH"
+    },
+    "billing": {
+        "name": "Faye Demo - UAT",
+        "address": {
+            "streetAddress1": "100, Grainger Parkway",
+            "city": "Lake Forest",
+            "zipCode": "60045",
+            "state": "Illinois",
+            "countryCode": "US"
         }
-    ]
+    },
+    "buyerContact": {
+        "name": "Faye Demo - UAT",
+        "contact": {
+            "name": "Faye Guevara",
+            "jobTitle": "Purchasing",
+            "email": "fguevara@shipserv.com"
+        }
+    },
+    "currency": {
+        "code": "EUR"
+    },
+    "freightCost": 0.0,
+    "discountCost": 0.0,
+    "discountPercentage": 0.0,
+    "subCost": 1033.0,
+    "cost": 1033.0,
+    "requestedDeliveryDate": "2025-07-02T12:00:00.000Z",
+    "comment": "",
+    "lineItems": [
+        {
+            "number": 1,
+            "description": "1 [PC] Gasket set for 1 cyl head | Manufacturer: 00355210 | Equipment: Diesel Engine | Model: E780 (HATZ DIESEL) | Comment: Buyer Part : 7313001001262, Notes : MAKER-HATZ DIESEL ENGINE|TYPE-E780",
+            "quantity": 10.0,
+            "unitOfMeasure": "PCE",
+            "unitPrice": 20.0,
+            "discountCost": 0.0,
+            "discountPercentage": 0.0,
+            "totalCost": 200.0,
+            "declined": false,
+            "deliveryLeadTime": 0
+        },
+        {
+            "number": 2,
+            "description": "2 [PC] 1000 hours maintenance kit | Manufacturer: 00961301 | Equipment: Diesel Engine | Model: E780 (HATZ DIESEL) | Comment: Buyer Part : 7313001002262, Notes : MAKER-HATZ DIESEL ENGINE|TYPE-E780",
+            "quantity": 20.0,
+            "unitOfMeasure": "PCE",
+            "unitPrice": 8.5,
+            "discountCost": 0.0,
+            "discountPercentage": 0.0,
+            "totalCost": 170.0,
+            "declined": false,
+            "deliveryLeadTime": 0
+        },
+        {
+            "number": 3,
+            "description": "3 [PC] Emergency kit | Manufacturer: 00965903 | Equipment: Diesel Engine | Model: E780 (HATZ DIESEL) | Comment: Buyer Part : 7313001003262, Notes : MAKER-HATZ DIESEL ENGINE|TYPE-E780",
+            "quantity": 20.0,
+            "unitOfMeasure": "PCE",
+            "unitPrice": 3.4,
+            "discountCost": 0.0,
+            "discountPercentage": 0.0,
+            "totalCost": 68.0,
+            "declined": false,
+            "deliveryLeadTime": 0
+        },
+        {
+            "number": 4,
+            "description": "4 [PC] Gasket set for crank case | Manufacturer: 01229800 | Equipment: Diesel Engine | Model: E780 (HATZ DIESEL) | Comment: Buyer Part : 7313001004262, Notes : MAKER-HATZ DIESEL ENGINE|TYPE-E780",
+            "quantity": 10.0,
+            "unitOfMeasure": "PCE",
+            "unitPrice": 44.5,
+            "discountCost": 0.0,
+            "discountPercentage": 0.0,
+            "totalCost": 445.0,
+            "declined": false,
+            "deliveryLeadTime": 0
+        },
+        {
+            "number": 5,
+            "description": "5 [PC] Packing and Handling | Buyer: 786.62.02.000.047",
+            "quantity": 10.0,
+            "unitOfMeasure": "PCE",
+            "unitPrice": 15.0,
+            "discountCost": 0.0,
+            "discountPercentage": 0.0,
+            "totalCost": 150.0,
+            "declined": false,
+            "deliveryLeadTime": 0
+        },
+        {
+            "number": 6,
+            "description": "900 Packing and Handling | Buyer: 786.62.02.000.047",
+            "quantity": 10.0,
+            "unitOfMeasure": "SET",
+            "unitPrice": 0.0,
+            "discountCost": 0.0,
+            "discountPercentage": 0.0,
+            "totalCost": 0.0,
+            "declined": false,
+            "deliveryLeadTime": 0
+        }
+    ],
+    "submittedDate": "2025-06-27T10:34:11.488Z",
+    "createdDate": "2025-06-27T10:34:11.488Z",
+    "status": "Unactioned",
+    "exported": false
 }

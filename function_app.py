@@ -15,6 +15,7 @@ from integrations.erp_odoo import ERPodooIntegration
 from portals.shipserv.client import ShipServPortal
 #from portals.cfm.downloadExcel import CloudFleetExcelExporter
 import urllib.parse
+import base64
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 shipserv_url= os.getenv("SHIPSERV_URL")
@@ -125,18 +126,7 @@ def shipserv_getDocument(req: func.HttpRequest) -> func.HttpResponse:
         # Transform the response
         transformed_response = transform_response(response.json())
         logging.info(f"Transformed response: {transformed_response}")
-        if transformed_response.get('type')== "RequestForQuote":
-            dispatch_results = dispatcher.dispatch_to_erps(transformed_response, erp_targets)
-        elif transformed_response.get('type')== "PurchaseOrderConfirmation":
-            dispatch_results = dispatcher.dispatch_to_erps_PurchaseOrderConfirmation(transformed_response, erp_targets)
-        elif transformed_response.get('type')== "Requisition":
-            dispatch_results = dispatcher.dispatch_to_erps_Requisition(transformed_response, erp_targets)   
-        elif transformed_response.get('type')== "Quote":
-            dispatch_results = dispatcher.dispatch_to_erps_Quote(transformed_response, erp_targets) 
-        elif transformed_response.get('type')== "PurchaseOrder":
-            dispatch_results = dispatcher.dispatch_to_erps_PurchaseOrder(transformed_response, erp_targets) 
-        else:   
-            logging.warning(f"Unknown type" f"{transformed_response.get('type')}. No dispatching performed.")   
+        dispatch_results = dispatcher.dispatch_document(transformed_response, erp_targets)
         logging.info(f"Dispatch results: {dispatch_results}")
         # Return the transformed JSON response
         return func.HttpResponse(
@@ -296,18 +286,24 @@ def modify_and_send_document_logic(document_data):
     logging.info(f"Document data to send (doc_SendData): {doc_SendData}")
     try:
         # Replace the 'id' field with 'requestForQuoteId'
-        doc_SendData["requestForQuoteId"] = doc_SendData.pop("id", None)
+        
 
         # Replace or add custom fields
         doc_SendData["type"] = document_data["customFields"].get("type", "Quote")
         if doc_SendData["type"] == "Quote":
-        # Felder entfernen, falls vorhanden
+            # Replace the 'id' field with 'requestForQuoteId'
+            doc_SendData["requestForQuoteId"] = doc_SendData.pop("id", None)
+            # Felder entfernen, falls vorhanden
             if "requisitionId" in doc_SendData:
                 doc_SendData.pop("requisitionId")
             if "quoteId" in doc_SendData:
                 doc_SendData.pop("quoteId")
             if "purchaseOrderId" in doc_SendData:
                 doc_SendData.pop("purchaseOrderId")
+        elif doc_SendData["type"] == "PurchaseOrderConfirmation":
+            # Replace the 'id' field with 'purchaseOrderId'
+            doc_SendData["purchaseOrderId"] = doc_SendData.pop("id", None)
+
         doc_SendData["discountCost"] = document_data["customFields"].get("discountCost", 0)
         doc_SendData["subCost"] = document_data["customFields"].get("subCost", 45)
         doc_SendData["cost"] = document_data["customFields"].get("cost", 45)
@@ -811,3 +807,119 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         "This HTTP triggered function executed successfully.",
         status_code=200
     )
+
+@app.route(route="shipserv_upload_attachment", methods=["POST"], auth_level=func.AuthLevel.FUNCTION)
+def shipserv_upload_attachment(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    HTTP-Trigger zum Hochladen von Dateien an die ShipServ API.
+    
+    Unterstützt folgende Eingabeformate:
+    1. multipart/form-data mit 'file' als Dateifeld und 'tnid' als Parameter
+    2. Binärdaten im Body mit 'filename' und 'tnid' als Parameter
+    3. Base64-codierte Daten mit 'filename', 'content' und 'tnid' im JSON-Body
+    
+    Returns:
+        HTTP-Antwort mit Upload-Ergebnis
+    """
+    logging.info("Processing attachment upload request")
+    
+    # Korrelations-ID für Request-Tracing
+    correlation_id = req.headers.get("x-correlation-id", f"upload-{req.url}")
+    
+    try:
+        # TNID-Parameter abrufen (erforderlich für ShipServ API)
+        tnid = req.params.get("tnid")
+        if not tnid:
+            body_json = req.get_json() if req.get_body() else {}
+            tnid = body_json.get("tnid") if isinstance(body_json, dict) else None
+            
+        if not tnid:
+            return func.HttpResponse(
+                json.dumps({"status": "error", "message": "Missing required parameter: tnid"}),
+                status_code=400,
+                mimetype="application/json"
+            )
+        
+        # Drei mögliche Upload-Szenarien prüfen
+        # 1. multipart/form-data (standard file upload)
+        if req.files and "file" in req.files:
+            file = req.files["file"]
+            filename = file.filename
+            file_content = file.stream.read()
+            
+            logging.info(f"Processing multipart upload: {filename} | {len(file_content)} bytes | Correlation ID: {correlation_id}")
+            result = shipserv_portal.upload_attachment(filename, tnid, file_content)
+            
+        # 2. JSON mit Base64-codiertem Inhalt
+        elif req.get_body() and req.headers.get("content-type", "").startswith("application/json"):
+            body_json = req.get_json()
+            
+            if not isinstance(body_json, dict):
+                return func.HttpResponse(
+                    json.dumps({"status": "error", "message": "Invalid JSON body"}),
+                    status_code=400,
+                    mimetype="application/json"
+                )
+                
+            filename = body_json.get("filename")
+            content_base64 = body_json.get("content")
+            
+            if not filename or not content_base64:
+                return func.HttpResponse(
+                    json.dumps({"status": "error", "message": "Missing required fields: filename and content"}),
+                    status_code=400,
+                    mimetype="application/json"
+                )
+                
+            try:
+                file_content = base64.b64decode(content_base64)
+                logging.info(f"Processing base64 upload: {filename} | {len(file_content)} bytes | Correlation ID: {correlation_id}")
+                result = shipserv_portal.upload_attachment(filename, tnid, file_content)
+            except Exception as decode_error:
+                return func.HttpResponse(
+                    json.dumps({"status": "error", "message": f"Invalid base64 content: {str(decode_error)}"}),
+                    status_code=400,
+                    mimetype="application/json"
+                )
+            
+        # 3. Binärdaten mit Dateiname als Parameter
+        else:
+            filename = req.params.get("filename")
+            if not filename:
+                return func.HttpResponse(
+                    json.dumps({"status": "error", "message": "Missing required parameter: filename"}),
+                    status_code=400,
+                    mimetype="application/json"
+                )
+                
+            file_content = req.get_body()
+            if not file_content:
+                return func.HttpResponse(
+                    json.dumps({"status": "error", "message": "Missing file content in request body"}),
+                    status_code=400,
+                    mimetype="application/json"
+                )
+                
+            logging.info(f"Processing raw binary upload: {filename} | {len(file_content)} bytes | Correlation ID: {correlation_id}")
+            result = shipserv_portal.upload_attachment(filename, tnid, file_content)
+            
+        # Ergebnis zurückgeben
+        status_code = 200 if result.get("status") == "success" else 500
+        return func.HttpResponse(
+            json.dumps(result),
+            status_code=status_code,
+            mimetype="application/json"
+        )
+        
+    except Exception as e:
+        error_message = str(e)
+        logging.exception(f"Error processing attachment upload: {error_message} | Correlation ID: {correlation_id}")
+        return func.HttpResponse(
+            json.dumps({
+                "status": "error", 
+                "message": f"Error processing request: {error_message}",
+                "correlation_id": correlation_id
+            }),
+            status_code=500,
+            mimetype="application/json"
+        )

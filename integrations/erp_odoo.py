@@ -235,6 +235,7 @@ class ERPodooIntegration:
                 
                 # Join all specifications with line breaks
                 vals['x_studio_specification'] = "\n".join(spec_details)
+                logging.info(f"Specifications set: {vals['x_studio_specification']}")
         else:
             vals['x_studio_specification'] = ""
 
@@ -262,13 +263,13 @@ class ERPodooIntegration:
                     # Get specification data if available
                     spec_info = ""
                     if product.get('specification'):
-                        spec = product['specification']
-                        if spec.get('Manufacturer'):
-                            spec_info += f"Manufacturer: {spec['Manufacturer']}\n"
-                        if spec.get('PartType'):
-                            spec_info += f"Part Type: {spec['PartType']}\n"
-                        if spec.get('PartTypeNumber'):
-                            spec_info += f"Part Number: {spec['PartTypeNumber']}\n"
+                        specItem = product['specification']
+                        if specItem.get('Manufacturer') and specItem.get('Manufacturer') != specs[0].get('Manufacturer'):
+                            spec_info += f"Manufacturer: {specItem['Manufacturer']}\n"
+                        if specItem.get('PartType') and specItem.get('PartType') != specs[0].get('PartType'):
+                            spec_info += f"Part Type: {specItem['PartType']}\n"
+                        if specItem.get('PartTypeNumber') and specItem.get('PartTypeNumber') != specs[0].get('PartTypeNumber'):
+                            spec_info += f"Part Number: {specItem['PartTypeNumber']}\n"
                     
                     # Create complete description
                     full_description = f"{item_number} {description}"
